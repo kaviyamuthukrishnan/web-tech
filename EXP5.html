@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GET vs POST Form Methods</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        max-width: 700px;
+        margin: 30px auto;
+        padding: 0 20px;
+        background-color: #f4f6f8;
+        color: #222;
+    }
+    header {
+        text-align: center;
+        background-color: #2c3e50;
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    h1 { margin: 0; }
+    section {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    h2 {
+        color: #2c3e50;
+        border-bottom: 2px solid #2c3e50;
+        padding-bottom: 5px;
+    }
+    label {
+        display: block;
+        margin-top: 10px;
+        font-weight: bold;
+    }
+    input[type="text"],
+    input[type="password"] {
+        width: 100%;
+        padding: 8px;
+        margin-top: 4px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    input[type="submit"] {
+        margin-top: 15px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+    }
+    .get-form input[type="submit"] { background-color: #2980b9; }
+    .post-form input[type="submit"] { background-color: #27ae60; }
+    .note {
+        background-color: #fdf3d3;
+        border-left: 4px solid #f1c40f;
+        padding: 10px 15px;
+        margin-top: 10px;
+        font-size: 0.95em;
+    }
+    footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 0.9em;
+        color: #777;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>GET vs POST Form Methods</h1>
+    <p>Web Technology Lab Exercise</p>
+</header>
+
+<section class="get-form">
+    <h2>1. Form Using GET Method</h2>
+    <p>Data submitted here is appended to the URL as a query string, so it's visible in the address bar and can be bookmarked or shared.</p>
+    <form action="https://httpbin.org/get" method="GET">
+        <label for="get-name">Student Name:</label>
+        <input type="text" id="get-name" name="studentName" placeholder="Enter your name">
+
+        <label for="get-course">Course:</label>
+        <input type="text" id="get-course" name="course" placeholder="Enter your course">
+
+        <input type="submit" value="Submit using GET">
+    </form>
+    <div class="note">
+        Observe: After submitting, check the browser's address bar — you'll see something like
+        <code>?studentName=...&amp;course=...</code> appended to the URL. This is why GET is
+        not suitable for sensitive data like passwords.
+    </div>
+</section>
+
+<section class="post-form">
+    <h2>2. Form Using POST Method</h2>
+    <p>Data submitted here is sent in the HTTP request body, so it does NOT appear in the URL — better suited for sensitive or large data.</p>
+    <form action="https://httpbin.org/post" method="POST">
+        <label for="post-name">Student Name:</label>
+        <input type="text" id="post-name" name="studentName" placeholder="Enter your name">
+
+        <label for="post-password">Password:</label>
+        <input type="password" id="post-password" name="password" placeholder="Enter a password">
+
+        <input type="submit" value="Submit using POST">
+    </form>
+    <div class="note">
+        Observe: After submitting, the URL stays as <code>https://httpbin.org/post</code> —
+        no form data is visible in the address bar. The submitted values instead appear inside
+        the JSON response body under the "form" key.
+    </div>
+</section>
+
+<section>
+    <h2>Key Differences: GET vs POST</h2>
+    <table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse: collapse;">
+        <tr style="background-color:#2c3e50; color:white;">
+            <th>Aspect</th>
+            <th>GET</th>
+            <th>POST</th>
+        </tr>
+        <tr>
+            <td>Data Visibility</td>
+            <td>Visible in URL (query string)</td>
+            <td>Hidden in request body</td>
+        </tr>
+        <tr>
+            <td>Data Length Limit</td>
+            <td>Limited (URL length restrictions)</td>
+            <td>No practical limit</td>
+        </tr>
+        <tr>
+            <td>Bookmarking</td>
+            <td>Can be bookmarked (data included)</td>
+            <td>Cannot be bookmarked with data</td>
+        </tr>
+        <tr>
+            <td>Security</td>
+            <td>Less secure, data exposed</td>
+            <td>More secure for sensitive data</td>
+        </tr>
+        <tr>
+            <td>Use Case</td>
+            <td>Search forms, filters</td>
+            <td>Login forms, registration, file uploads</td>
+        </tr>
+    </table>
+</section>
+
+<footer>
+    <p>&copy; 2026 Kaviya | Reg No: 192421050</p>
+</footer>
+
+</body>
+</html>
