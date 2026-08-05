@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Observing Internet Protocols - DevTools Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<style>
+    body {
+        font-family: 'Roboto', Arial, sans-serif;
+        max-width: 850px;
+        margin: 30px auto;
+        padding: 0 20px;
+        background-color: #f4f6f8;
+        color: #222;
+    }
+    header {
+        text-align: center;
+        background-color: #2c3e50;
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    section {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    h2 {
+        color: #2c3e50;
+        border-bottom: 2px solid #2c3e50;
+        padding-bottom: 5px;
+    }
+    ol li { margin-bottom: 8px; }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px 10px;
+        text-align: left;
+        font-size: 0.9em;
+    }
+    th { background-color: #2c3e50; color: white; }
+    .note {
+        background-color: #fdf3d3;
+        border-left: 4px solid #f1c40f;
+        padding: 10px 15px;
+        margin-top: 10px;
+        font-size: 0.95em;
+    }
+    button {
+        padding: 8px 16px;
+        background-color: #27ae60;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    img { display: block; margin-top: 10px; border-radius: 6px; }
+    footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 0.9em;
+        color: #777;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Observing Internet Protocols Using DevTools</h1>
+    <p>Web Technology Lab Exercise - Network Tab Analysis</p>
+</header>
+
+<section>
+    <h2>Step-by-Step Instructions</h2>
+    <ol>
+        <li>Open this page in Chrome or Edge.</li>
+        <li>Press <strong>F12</strong> (or right-click → Inspect) to open Developer Tools.</li>
+        <li>Click the <strong>Network</strong> tab.</li>
+        <li>Refresh the page (Ctrl+R / Cmd+R) with the Network tab open so it captures every request from the start.</li>
+        <li>Click the "Load Extra Resource" button below to trigger one more request.</li>
+        <li>For each row in the Network tab, note: <strong>Name/URL, Protocol, Method, Status, Type, Size, Time</strong> — this page loads a font, a script, an image, and (on button click) an XML file, giving you a mix of resource types to observe.</li>
+    </ol>
+    <div class="note">
+        Tip: The "Protocol" column may be hidden by default. Right-click any column header in the Network tab and enable "Protocol" from the checklist to reveal it (it will typically show <code>h2</code> or <code>http/1.1</code>).
+    </div>
+</section>
+
+<section>
+    <h2>Resources Loaded on This Page (for observation)</h2>
+    <p>These already generated Network requests when the page loaded:</p>
+    <ul>
+        <li>Google Fonts stylesheet (CSS file)</li>
+        <li>jQuery library from a CDN (JS file)</li>
+        <li>An image (loaded below)</li>
+    </ul>
+    <img src="https://picsum.photos/id/1025/350/220" alt="Sample dog photo for network observation" width="350" height="220">
+
+    <p>Click this button to trigger one more request you can observe live:</p>
+    <button onclick="loadExtraResource()">Load Extra Resource (XML file)</button>
+    <p id="result" style="font-family: monospace; margin-top:10px;"></p>
+</section>
+
+<section>
+    <h2>Observation Table (fill this in from your Network tab)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>URL / Name</th>
+                <th>Protocol</th>
+                <th>Method</th>
+                <th>Status Code</th>
+                <th>File Type</th>
+                <th>Size</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>Key Terms for Your Lab Report</h2>
+    <table>
+        <tr><th>Term</th><th>Meaning</th></tr>
+        <tr><td>Protocol</td><td>The rule set used to transfer data (e.g. HTTP/1.1, h2 for HTTP/2, h3 for HTTP/3)</td></tr>
+        <tr><td>Method</td><td>The action requested — GET (retrieve data) or POST (send data) are most common</td></tr>
+        <tr><td>Status Code</td><td>Server's response code — 200 (OK), 304 (Not Modified/cached), 404 (Not Found), 500 (Server Error)</td></tr>
+        <tr><td>Type</td><td>The kind of resource — document, stylesheet, script, image, xhr/fetch, font</td></tr>
+        <tr><td>Size</td><td>Data transferred, often shown as "transferred / actual resource size"</td></tr>
+        <tr><td>Time</td><td>How long the request took, from send to full response</td></tr>
+    </table>
+</section>
+
+<footer>
+    <p>&copy; 2026 Kaviya | Reg No: 192421050</p>
+</footer>
+
+<script>
+function loadExtraResource() {
+    // Triggers a visible fetch request in the Network tab
+    fetch("student_data.xml")
+        .then(response => {
+            document.getElementById("result").innerText =
+                "Fetched student_data.xml — status: " + response.status + " " + response.statusText;
+            return response.text();
+        })
+        .catch(() => {
+            document.getElementById("result").innerText =
+                "Request sent (check Network tab) — file may not be hosted at this path locally.";
+        });
+}
+</script>
+
+</body>
+</html>

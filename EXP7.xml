@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<students>
+
+    <student>
+        <rollNumber>192421050</rollNumber>
+        <name>Kaviya</name>
+        <department>Information Technology</department>
+        <year>2</year>
+        <email>kaviya.192421050@example.com</email>
+        <mobileNumber>9876543210</mobileNumber>
+    </student>
+
+    <student>
+        <rollNumber>192421051</rollNumber>
+        <name>Arjun Kumar</name>
+        <department>Computer Science Engineering</department>
+        <year>2</year>
+        <email>arjun.192421051@example.com</email>
+        <mobileNumber>9876543211</mobileNumber>
+    </student>
+
+    <student>
+        <rollNumber>192421052</rollNumber>
+        <name>Divya Sree</name>
+        <department>Electronics and Communication</department>
+        <year>3</year>
+        <email>divya.192421052@example.com</email>
+        <mobileNumber>9876543212</mobileNumber>
+    </student>
+
+    <student>
+        <rollNumber>192421053</rollNumber>
+        <name>Mohammed Faizal</name>
+        <department>Information Technology</department>
+        <year>2</year>
+        <email>faizal.192421053@example.com</email>
+        <mobileNumber>9876543213</mobileNumber>
+    </student>
+
+</students>
