@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saveetha University | Event Registration Portal</title>
+
+<!-- Google Fonts: open-source, freely hosted webfonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- External stylesheet: primary site design (CSS Requirement B1) -->
+<link rel="stylesheet" href="style.css">
+
+<!-- ============================================================
+     INTERNAL CSS DEMONSTRATION (CSS Requirement B1)
+     Scoped intentionally to the Hero section only, as required
+     by the brief. All other sections are styled from style.css.
+     ============================================================ -->
+<style>
+  /* Internal CSS: applies only to the .hero section */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(232,135,30,0.16), transparent 45%),
+      linear-gradient(135deg, #14213d 0%, #1d2e57 55%, #14213d 100%);
+    z-index: -1;
+  }
+  .hero__eyebrow {
+    letter-spacing: 0.14em;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================ HEADER ============================ -->
+<header class="site-header" id="top">
+  <div class="site-header__inner">
+    <div class="brand">
+      <span class="brand__mark" aria-hidden="true">RU</span>
+      <div class="brand__text">
+        <span class="brand__university">Saveetha University</span>
+        <span class="brand__portal">Event Registration Portal</span>
+      </div>
+    </div>
+
+    <!-- Fixed help button demonstrates positioning beyond normal flow -->
+    <nav class="main-nav" aria-label="Primary navigation">
+      <ul>
+        <li><a href="#top">Home</a></li>
+        <li><a href="#catalogue">Events</a></li>
+        <li><a href="#register">Register</a></li>
+        <li><a href="#footer">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- Fixed-position help button (Positioning Requirement B5) -->
+<a href="#register" class="help-fab" title="Jump to registration form">
+  <span aria-hidden="true">?</span>
+  <span class="visually-hidden">Need help registering</span>
+</a>
+
+<!-- ============================ HERO ============================ -->
+<section class="hero">
+  <div class="hero__content">
+    <p class="hero__eyebrow">Annual Technical &amp; Cultural Season</p>
+    <h1 class="hero__title">Register once.<br>Attend every event on campus.</h1>
+    <p class="hero__subtitle">
+      From hackathons to placement bootcamps, cultural nights to sports meets —
+      one portal handles every sign-up for the
+      <!-- Inline CSS demonstration (CSS Requirement B1): one small element only -->
+      <span style="color:#e8871e; font-weight:600;">14 – 28 September</span>
+      campaign period.
+    </p>
+    <a href="#catalogue" class="btn btn--primary">Browse Events</a>
+  </div>
+</section>
+
+<!-- ============================ EVENT CATALOGUE ============================ -->
+<main>
+<section class="catalogue" id="catalogue">
+  <div class="section-heading">
+    <h2>Event Catalogue</h2>
+    <p>Four categories, one weekend each. Pick what fits your calendar.</p>
+  </div>
+
+  <div class="card-grid">
+
+    <!-- Card 1: Technical -->
+    <article class="event-card event-card--open" data-category="technical">
+      <span class="event-card__status">Open</span>
+      <p class="event-card__category">Technical</p>
+      <h3 class="event-card__title">CodeForge 36-Hour Hackathon</h3>
+      <p class="event-card__meta">
+        <time datetime="2026-09-19">19 Sep 2026</time> · 9:00 AM – 9:00 PM (Day 1–2)
+      </p>
+      <p class="event-card__venue">Venue: CSE Block, Innovation Lab</p>
+      <p class="event-card__desc">
+        Build a working prototype in 36 hours with mentors from campus start-ups.
+        Teams of up to four; open to all departments.
+      </p>
+      <button class="btn btn--card" type="button">Register for CodeForge</button>
+    </article>
+
+    <!-- Card 2: Cultural -->
+    <article class="event-card event-card--open" data-category="cultural">
+      <span class="event-card__status">Open</span>
+      <p class="event-card__category">Cultural</p>
+      <h3 class="event-card__title">Rangotsav Dance &amp; Music Night</h3>
+      <p class="event-card__meta">
+        <time datetime="2026-09-21">21 Sep 2026</time> · 6:00 PM – 9:30 PM
+      </p>
+      <p class="event-card__venue">Venue: Open Air Amphitheatre</p>
+      <p class="event-card__desc">
+        Solo and group performances across classical, folk and contemporary
+        categories. Auditions not required for group entries.
+      </p>
+      <button class="btn btn--card" type="button">Register for Rangotsav</button>
+    </article>
+
+    <!-- Card 3: Placement -->
+    <article class="event-card event-card--limited" data-category="placement">
+      <span class="event-card__status">Filling Fast</span>
+      <p class="event-card__category">Placement Training</p>
+      <h3 class="event-card__title">Aptitude &amp; Resume Bootcamp</h3>
+      <p class="event-card__meta">
+        <time datetime="2026-09-24">24 Sep 2026</time> · 10:00 AM – 4:00 PM
+      </p>
+      <p class="event-card__venue">Venue: Placement Cell, Seminar Hall</p>
+      <p class="event-card__desc">
+        Mock aptitude tests, resume review clinics and a group-discussion round
+        with alumni recruiters. Final-year students prioritised.
+      </p>
+      <button class="btn btn--card" type="button">Register for Bootcamp</button>
+    </article>
+
+    <!-- Card 4: Sports -->
+    <article class="event-card event-card--closed" data-category="sports">
+      <span class="event-card__status">Closed</span>
+      <p class="event-card__category">Sports</p>
+      <h3 class="event-card__title">Inter-Department Athletics Meet</h3>
+      <p class="event-card__meta">
+        <time datetime="2026-09-27">27 Sep 2026</time> · 7:00 AM – 1:00 PM
+      </p>
+      <p class="event-card__venue">Venue: University Athletics Ground</p>
+      <p class="event-card__desc">
+        Track and field events across eight departments. Registration closed;
+        department captains have the finalised team lists.
+      </p>
+      <button class="btn btn--card" type="button" disabled>Registration Closed</button>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============================ REGISTRATION FORM ============================ -->
+<section class="registration" id="register">
+  <div class="section-heading">
+    <h2>Registration Form</h2>
+    <p>One form covers every event in the catalogue above.</p>
+  </div>
+
+  <form class="reg-form" action="#" method="post" novalidate>
+
+    <div class="form-row">
+      <label for="fullname">Full Name</label>
+      <input type="text" id="fullname" name="fullname" placeholder="As per college ID" required>
+    </div>
+
+    <div class="form-row">
+      <label for="regno">Register Number</label>
+      <input type="text" id="regno" name="regno" placeholder="e.g. 22ITR045" required pattern="[A-Za-z0-9]+">
+    </div>
+
+    <div class="form-row">
+      <label for="dept">Department</label>
+      <select id="dept" name="dept" required>
+        <option value="" disabled selected>Select department</option>
+        <option value="cse">Computer Science &amp; Engineering</option>
+        <option value="it">Information Technology</option>
+        <option value="ece">Electronics &amp; Communication</option>
+        <option value="eee">Electrical &amp; Electronics</option>
+        <option value="mech">Mechanical Engineering</option>
+        <option value="civil">Civil Engineering</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" name="email" placeholder="you@university.edu" required>
+    </div>
+
+    <div class="form-row">
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" name="phone" placeholder="10-digit mobile number" pattern="[0-9]{10}">
+    </div>
+
+    <div class="form-row form-row--wide">
+      <label for="event">Event Selection</label>
+      <select id="event" name="event" required>
+        <option value="" disabled selected>Choose an event</option>
+        <option value="codeforge">CodeForge 36-Hour Hackathon (Technical)</option>
+        <option value="rangotsav">Rangotsav Dance &amp; Music Night (Cultural)</option>
+        <option value="bootcamp">Aptitude &amp; Resume Bootcamp (Placement)</option>
+      </select>
+    </div>
+
+    <div class="form-row form-row--wide">
+      <fieldset class="reg-form__fieldset">
+        <legend>Meal Preference</legend>
+        <label class="radio-label"><input type="radio" name="meal" value="veg" checked> Vegetarian</label>
+        <label class="radio-label"><input type="radio" name="meal" value="nonveg"> Non-Vegetarian</label>
+      </fieldset>
+    </div>
+
+    <div class="form-row form-row--wide form-row--consent">
+      <label class="checkbox-label">
+        <input type="checkbox" name="consent" required>
+        I agree to the code of conduct for university events.
+      </label>
+    </div>
+
+    <div class="form-row form-row--wide">
+      <button type="submit" class="btn btn--primary btn--submit">Submit Registration</button>
+    </div>
+
+  </form>
+</section>
+</main>
+
+<!-- ============================ FOOTER ============================ -->
+<footer class="site-footer" id="footer">
+  <div class="site-footer__inner">
+    <div class="footer-block">
+      <h3>Contact</h3>
+      <p>Student Activity Centre, Saveetha University<br>
+      Sriperumbudur, Tamil Nadu 602117</p>
+      <p>events@saveetha.edu.in · +91 44 2715 0000</p>
+    </div>
+    <div class="footer-block">
+      <h3>Useful Links</h3>
+      <ul class="footer-links">
+        <li><a href="#catalogue">Event Catalogue</a></li>
+        <li><a href="#register">Registration Form</a></li>
+        <li><a href="#top">Back to Top</a></li>
+      </ul>
+    </div>
+    <div class="footer-block">
+      <h3>Academic Season 2026</h3>
+      <p>All events run 14–28 September 2026. Schedules subject to venue confirmation.</p>
+    </div>
+  </div>
+  <p class="footer-copyright">&copy; 2026 Saveetha University. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
