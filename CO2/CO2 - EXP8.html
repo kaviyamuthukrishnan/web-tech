@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Exam Time Manager</title>
+<style>
+  :root{
+    --bg1:#0B0F1F;
+    --bg2:#141B33;
+    --panel:#171F3B;
+    --panel-border:#2A3560;
+    --cyan:#38D9F5;
+    --purple:#8C6CFF;
+    --pink:#FF4FA3;
+    --green:#3DDC84;
+    --yellow:#FFC93C;
+    --red:#FF4D5E;
+    --text-dim:#8B93B8;
+    --radius:20px;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; font-family:'Segoe UI','Trebuchet MS',sans-serif; }
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(56,217,245,0.10), transparent 40%),
+      radial-gradient(circle at 85% 85%, rgba(140,108,255,0.14), transparent 45%),
+      linear-gradient(180deg, var(--bg1), var(--bg2));
+    color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    padding:30px 16px;
+  }
+
+  .app{
+    width:100%; max-width:1100px;
+    background:linear-gradient(160deg, #10162C, #0D1226);
+    border:1px solid var(--panel-border);
+    border-radius:26px;
+    box-shadow:0 30px 70px rgba(0,0,0,0.5);
+    overflow:hidden;
+    display:grid;
+    grid-template-columns: 1.3fr 1fr;
+  }
+
+  /* ===== LEFT: LIVE CLOCK ===== */
+  .clock-side{
+    padding:44px 40px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center;
+    border-right:1px solid var(--panel-border);
+  }
+  .brand{
+    letter-spacing:4px; color:var(--text-dim); font-size:0.85rem; font-weight:700; margin-bottom:6px;
+  }
+  .title-main{
+    font-size:1.5rem; font-weight:800; margin-bottom:36px;
+    background:linear-gradient(90deg,var(--cyan),var(--purple));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    letter-spacing:1px;
+  }
+  .live-time{
+    font-size:clamp(3rem,8vw,4.6rem); font-weight:800; letter-spacing:4px;
+    color:var(--cyan);
+    text-shadow:0 0 24px rgba(56,217,245,0.55);
+    font-variant-numeric: tabular-nums;
+    margin-bottom:12px;
+  }
+  .live-day{
+    font-size:1.2rem; font-weight:700; letter-spacing:3px; color:#fff; margin-bottom:4px;
+  }
+  .live-date{
+    font-size:0.95rem; color:var(--text-dim); letter-spacing:2px;
+  }
+
+  /* ===== RIGHT: COUNTDOWN ===== */
+  .countdown-side{
+    padding:40px 34px;
+    display:flex; flex-direction:column;
+  }
+  .countdown-header{
+    display:flex; align-items:center; gap:10px; margin-bottom:22px;
+  }
+  .countdown-header .dot{
+    width:10px; height:10px; border-radius:50%; background:var(--pink);
+    box-shadow:0 0 10px var(--pink);
+  }
+  .countdown-header h2{
+    font-size:0.95rem; letter-spacing:3px; color:var(--text-dim); font-weight:700;
+  }
+
+  .exam-card{
+    background:var(--panel); border:1px solid var(--panel-border); border-radius:var(--radius);
+    padding:26px 24px; margin-bottom:20px;
+  }
+  .exam-subject{
+    font-size:0.8rem; letter-spacing:2px; color:var(--purple); font-weight:700; margin-bottom:6px;
+  }
+  .exam-name{ font-size:1.3rem; font-weight:800; margin-bottom:14px; }
+  .exam-datetime{
+    font-size:0.85rem; color:var(--text-dim); display:flex; align-items:center; gap:8px;
+  }
+
+  .countdown-time{
+    display:flex; justify-content:center; gap:14px; margin:20px 0 18px;
+  }
+  .time-block{
+    background:#0D1330; border:1px solid var(--panel-border); border-radius:14px;
+    padding:16px 14px; min-width:78px; text-align:center;
+  }
+  .time-block .num{
+    font-size:2rem; font-weight:800; color:var(--purple);
+    text-shadow:0 0 18px rgba(140,108,255,0.5);
+    font-variant-numeric: tabular-nums;
+  }
+  .time-block .lbl{
+    font-size:0.68rem; letter-spacing:2px; color:var(--text-dim); margin-top:4px;
+  }
+
+  .status-msg{
+    text-align:center; padding:14px; border-radius:14px; font-weight:700; font-size:0.95rem;
+    margin-bottom:22px; transition:.3s;
+  }
+  .status-green{ background:rgba(61,220,132,0.12); color:var(--green); border:1px solid rgba(61,220,132,0.3); }
+  .status-yellow{ background:rgba(255,201,60,0.12); color:var(--yellow); border:1px solid rgba(255,201,60,0.3); }
+  .status-red{ background:rgba(255,77,94,0.14); color:var(--red); border:1px solid rgba(255,77,94,0.35); animation:pulse 1s infinite; }
+  .status-over{ background:rgba(140,108,255,0.14); color:var(--purple); border:1px solid rgba(140,108,255,0.35); }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.55;} }
+
+  .set-exam{
+    margin-top:auto;
+    background:var(--panel); border:1px solid var(--panel-border); border-radius:var(--radius);
+    padding:20px;
+  }
+  .set-exam h3{ font-size:0.8rem; letter-spacing:2px; color:var(--text-dim); margin-bottom:12px; }
+  .set-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .set-row input{
+    flex:1 1 140px; padding:10px 12px; border-radius:10px; border:1px solid var(--panel-border);
+    background:#0D1330; color:#fff; font-size:0.85rem;
+  }
+  .set-row input::placeholder{ color:var(--text-dim); }
+  .set-row button{
+    padding:10px 18px; border:none; border-radius:10px; font-weight:700; cursor:pointer;
+    background:linear-gradient(90deg,var(--cyan),var(--purple)); color:#0B0F1F;
+    transition:transform .2s;
+  }
+  .set-row button:hover{ transform:translateY(-2px); }
+
+  footer{
+    grid-column:1 / -1; text-align:center; padding:14px; color:var(--text-dim); font-size:0.8rem;
+    border-top:1px solid var(--panel-border);
+  }
+  footer strong{ color:var(--cyan); }
+
+  @media (max-width:800px){
+    .app{ grid-template-columns:1fr; }
+    .clock-side{ border-right:none; border-bottom:1px solid var(--panel-border); padding:36px 24px; }
+    .countdown-side{ padding:30px 22px; }
+    .countdown-time{ flex-wrap:wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- LIVE CLOCK SIDE -->
+  <div class="clock-side">
+    <div class="brand">STUDENT TIME MANAGER</div>
+    <div class="title-main">🕐 Live Clock</div>
+    <div class="live-time" id="liveTime">00:00:00</div>
+    <div class="live-day" id="liveDay">SATURDAY</div>
+    <div class="live-date" id="liveDate">22 AUGUST 2026</div>
+  </div>
+
+  <!-- EXAM COUNTDOWN SIDE -->
+  <div class="countdown-side">
+    <div class="countdown-header">
+      <span class="dot"></span>
+      <h2>EXAM COUNTDOWN</h2>
+    </div>
+
+    <div class="exam-card">
+      <div class="exam-subject">SUBJECT</div>
+      <div class="exam-name" id="examName">Web Technology Exam</div>
+      <div class="exam-datetime">📅 <span id="examDateDisplay">Starts soon</span></div>
+    </div>
+
+    <div class="countdown-time">
+      <div class="time-block"><div class="num" id="cdHours">00</div><div class="lbl">HOURS</div></div>
+      <div class="time-block"><div class="num" id="cdMinutes">00</div><div class="lbl">MINUTES</div></div>
+      <div class="time-block"><div class="num" id="cdSeconds">00</div><div class="lbl">SECONDS</div></div>
+    </div>
+
+    <div class="status-msg status-green" id="statusMsg">🟢 More than 1 hour remaining</div>
+
+    <div class="set-exam">
+      <h3>SET EXAM DETAILS</h3>
+      <div class="set-row">
+        <input type="text" id="examNameInput" placeholder="Exam name">
+        <input type="datetime-local" id="examTimeInput">
+        <button id="setExamBtn">Set</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>Built by <strong>Kaviya Muthukrishnan</strong> — SIMATS University Web Tech Lab</footer>
+</div>
+
+<script>
+  // ===== LIVE CLOCK =====
+  const liveTimeEl = document.getElementById('liveTime');
+  const liveDayEl = document.getElementById('liveDay');
+  const liveDateEl = document.getElementById('liveDate');
+
+  const dayNames = ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
+  const monthNames = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+
+  function pad(n){ return n.toString().padStart(2,'0'); }
+
+  function updateClock(){
+    const now = new Date();
+    const h = pad(now.getHours());
+    const m = pad(now.getMinutes());
+    const s = pad(now.getSeconds());
+    liveTimeEl.textContent = `${h} : ${m} : ${s}`;
+    liveDayEl.textContent = dayNames[now.getDay()];
+    liveDateEl.textContent = `${pad(now.getDate())} ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+  }
+
+  // ===== EXAM COUNTDOWN =====
+  let examName = "Web Technology Exam";
+  // default target: 2 hours 15 minutes from load, for demo purposes
+  let examTarget = new Date(Date.now() + (2*60*60*1000) + (15*60*1000));
+
+  const cdHours = document.getElementById('cdHours');
+  const cdMinutes = document.getElementById('cdMinutes');
+  const cdSeconds = document.getElementById('cdSeconds');
+  const statusMsg = document.getElementById('statusMsg');
+  const examNameEl = document.getElementById('examName');
+  const examDateDisplay = document.getElementById('examDateDisplay');
+
+  function formatExamDate(date){
+    const opts = { weekday:'long', day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' };
+    return date.toLocaleString('en-US', opts);
+  }
+
+  function updateCountdown(){
+    const now = new Date();
+    let diff = examTarget - now;
+
+    if (diff <= 0){
+      cdHours.textContent = "00";
+      cdMinutes.textContent = "00";
+      cdSeconds.textContent = "00";
+      statusMsg.textContent = "🟣 EXAM HAS STARTED — GOOD LUCK!";
+      statusMsg.className = "status-msg status-over";
+      return;
+    }
+
+    const totalSeconds = Math.floor(diff / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    cdHours.textContent = pad(hours);
+    cdMinutes.textContent = pad(minutes);
+    cdSeconds.textContent = pad(seconds);
+
+    if (hours >= 1){
+      statusMsg.textContent = "🟢 More than 1 hour remaining";
+      statusMsg.className = "status-msg status-green";
+    } else if (minutes >= 30){
+      statusMsg.textContent = "🟡 Less than 1 hour — get ready!";
+      statusMsg.className = "status-msg status-yellow";
+    } else if (minutes >= 5){
+      statusMsg.textContent = "🟡 Less than 30 minutes remaining";
+      statusMsg.className = "status-msg status-yellow";
+    } else {
+      statusMsg.textContent = "🔴 Exam starting soon!";
+      statusMsg.className = "status-msg status-red";
+    }
+  }
+
+  function tick(){
+    updateClock();
+    updateCountdown();
+  }
+
+  setInterval(tick, 1000);
+  tick();
+
+  examNameEl.textContent = examName;
+  examDateDisplay.textContent = formatExamDate(examTarget);
+
+  // ===== SET CUSTOM EXAM DETAILS =====
+  document.getElementById('setExamBtn').addEventListener('click', () => {
+    const nameVal = document.getElementById('examNameInput').value.trim();
+    const timeVal = document.getElementById('examTimeInput').value;
+
+    if (nameVal){
+      examName = nameVal;
+      examNameEl.textContent = examName;
+    }
+    if (timeVal){
+      const newTarget = new Date(timeVal);
+      if (!isNaN(newTarget.getTime())){
+        examTarget = newTarget;
+        examDateDisplay.textContent = formatExamDate(examTarget);
+      }
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech Challenge – Online Quiz</title>
+<style>
+  :root{
+    --purple:#6C3CE9;
+    --pink:#FF3E9A;
+    --orange:#FF8A3D;
+    --teal:#1FC8C1;
+    --yellow:#FFC93C;
+    --blue:#2F6FED;
+    --green:#2ECC71;
+    --red:#FF4D5E;
+    --dark:#1B1330;
+    --bg:#F6F4FF;
+    --card-bg:#ffffff;
+    --radius:20px;
+    --shadow:0 14px 34px rgba(108,60,233,0.18);
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; font-family:'Segoe UI','Trebuchet MS',sans-serif; }
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% 15%, rgba(255,201,60,0.18), transparent 35%),
+      radial-gradient(circle at 85% 25%, rgba(31,200,193,0.2), transparent 40%),
+      radial-gradient(circle at 50% 100%, rgba(255,62,154,0.15), transparent 45%),
+      var(--bg);
+    color:var(--dark);
+    display:flex; align-items:center; justify-content:center;
+    padding:30px 16px;
+  }
+
+  .app-wrap{ width:100%; max-width:620px; }
+
+  .top-banner{
+    text-align:center; margin-bottom:22px;
+  }
+  .top-banner h1{
+    font-size:clamp(1.6rem,5vw,2.2rem); font-weight:800;
+    background:linear-gradient(90deg,var(--purple),var(--pink));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    letter-spacing:1px;
+  }
+  .top-banner p{ color:#8b83a0; font-size:0.9rem; margin-top:4px; }
+
+  .quiz-card{
+    background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:34px 32px; position:relative; overflow:hidden;
+  }
+
+  /* progress bar */
+  .progress-track{
+    width:100%; height:10px; background:#EDE8FB; border-radius:20px; margin-bottom:22px; overflow:hidden;
+  }
+  .progress-fill{
+    height:100%; width:10%;
+    background:linear-gradient(90deg,var(--teal),var(--purple));
+    border-radius:20px; transition:width .4s ease;
+  }
+
+  .quiz-meta{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;
+  }
+  .q-counter{
+    font-weight:700; color:var(--purple); font-size:0.95rem;
+    background:#F1ECFF; padding:6px 16px; border-radius:20px;
+  }
+  .q-score-live{
+    font-weight:700; color:var(--teal); font-size:0.95rem;
+  }
+
+  .question-text{
+    font-size:1.3rem; font-weight:800; margin-bottom:26px; line-height:1.4;
+  }
+
+  .options{ display:flex; flex-direction:column; gap:14px; margin-bottom:28px; }
+  .option{
+    display:flex; align-items:center; gap:14px;
+    padding:16px 18px; border:2px solid #ECE7FA; border-radius:14px;
+    cursor:pointer; font-size:0.98rem; font-weight:600;
+    transition: all .2s;
+    background:#fff;
+  }
+  .option:hover{ border-color:var(--purple); background:#F8F5FF; transform:translateX(4px); }
+  .option .radio{
+    width:20px; height:20px; border-radius:50%; border:2px solid #C9BFEE;
+    flex-shrink:0; position:relative; transition:.2s;
+  }
+  .option.selected{ border-color:var(--purple); background:#F1ECFF; }
+  .option.selected .radio{ border-color:var(--purple); }
+  .option.selected .radio::after{
+    content:''; position:absolute; inset:3px; border-radius:50%; background:var(--purple);
+  }
+  .option.disabled{ pointer-events:none; }
+  .option.correct{ border-color:var(--green); background:#E8FBF0; }
+  .option.correct .radio{ border-color:var(--green); }
+  .option.correct .radio::after{ content:''; position:absolute; inset:3px; border-radius:50%; background:var(--green); }
+  .option.wrong{ border-color:var(--red); background:#FFEDEF; }
+  .option.wrong .radio{ border-color:var(--red); }
+  .option.wrong .radio::after{ content:''; position:absolute; inset:3px; border-radius:50%; background:var(--red); }
+  .option .mark{ margin-left:auto; font-size:1.1rem; }
+
+  .btn{
+    padding:14px 34px; border:none; border-radius:30px; font-weight:700; font-size:1rem;
+    cursor:pointer; transition: transform .2s, box-shadow .2s; display:block; margin-left:auto;
+  }
+  .btn:disabled{ opacity:0.5; cursor:not-allowed; }
+  .btn-primary{
+    background:linear-gradient(90deg,var(--purple),var(--pink)); color:#fff;
+    box-shadow:0 10px 24px rgba(108,60,233,0.35);
+  }
+  .btn-primary:not(:disabled):hover{ transform:translateY(-3px); box-shadow:0 14px 28px rgba(108,60,233,0.45); }
+
+  /* ===== RESULT SCREEN ===== */
+  .result-screen{ text-align:center; display:none; }
+  .result-screen.active{ display:block; }
+  .result-emoji{ font-size:3.4rem; margin-bottom:6px; }
+  .result-screen h2{ font-size:1.5rem; font-weight:800; margin-bottom:20px; color:var(--purple); }
+  .score-circle{
+    width:170px; height:170px; border-radius:50%; margin:0 auto 20px;
+    background:conic-gradient(var(--teal) calc(var(--pct)*1%), #EDE8FB 0);
+    display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  .score-circle::before{
+    content:''; position:absolute; inset:12px; border-radius:50%; background:#fff;
+  }
+  .score-inner{ position:relative; z-index:2; }
+  .score-inner .big{ font-size:2rem; font-weight:800; }
+  .score-inner .small{ font-size:0.85rem; color:#8b83a0; }
+
+  .performance-msg{
+    font-size:1.15rem; font-weight:800; margin-bottom:24px;
+  }
+  .perf-great{ color:var(--green); }
+  .perf-good{ color:var(--blue); }
+  .perf-okay{ color:var(--orange); }
+  .perf-retry{ color:var(--red); }
+
+  .result-stats{
+    display:flex; justify-content:center; gap:20px; margin-bottom:30px; flex-wrap:wrap;
+  }
+  .result-stat{
+    background:#F5F2FF; border-radius:14px; padding:16px 26px; min-width:130px;
+  }
+  .result-stat h3{ font-size:1.5rem; }
+  .result-stat p{ font-size:0.82rem; color:#8b83a0; margin-top:2px; }
+  #correctCount{ color:var(--green); }
+  #wrongCount{ color:var(--red); }
+
+  .btn-restart{
+    margin:0 auto; background:linear-gradient(90deg,var(--teal),var(--blue)); color:#fff;
+    box-shadow:0 10px 24px rgba(31,200,193,0.35);
+  }
+  .btn-restart:hover{ transform:translateY(-3px); box-shadow:0 14px 28px rgba(31,200,193,0.45); }
+
+  footer{
+    text-align:center; margin-top:20px; color:#8b83a0; font-size:0.85rem;
+  }
+  footer strong{ color:var(--purple); }
+
+  @media (max-width:480px){
+    .quiz-card{ padding:26px 20px; }
+    .question-text{ font-size:1.1rem; }
+    .btn{ width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-wrap">
+  <div class="top-banner">
+    <h1>🧠 TECH CHALLENGE</h1>
+    <p>Interactive Student Quiz & Assessment System</p>
+  </div>
+
+  <div class="quiz-card">
+
+    <!-- QUIZ SCREEN -->
+    <div id="quizScreen">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="quiz-meta">
+        <span class="q-counter" id="qCounter">Question 1 of 10</span>
+        <span class="q-score-live" id="liveScore">Score: 0</span>
+      </div>
+      <div class="question-text" id="questionText"></div>
+      <div class="options" id="optionsContainer"></div>
+      <button class="btn btn-primary" id="nextBtn" disabled>NEXT →</button>
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div class="result-screen" id="resultScreen">
+      <div class="result-emoji">🎉</div>
+      <h2>QUIZ COMPLETED</h2>
+      <div class="score-circle" id="scoreCircle">
+        <div class="score-inner">
+          <div class="big" id="scoreFraction">0 / 10</div>
+          <div class="small" id="scorePercent">0%</div>
+        </div>
+      </div>
+      <div class="performance-msg" id="performanceMsg"></div>
+      <div class="result-stats">
+        <div class="result-stat"><h3 id="correctCount">0</h3><p>Correct Answers</p></div>
+        <div class="result-stat"><h3 id="wrongCount">0</h3><p>Wrong Answers</p></div>
+      </div>
+      <button class="btn btn-restart" id="restartBtn">🔄 Try Again</button>
+    </div>
+
+  </div>
+
+  <footer>Built by <strong>Kaviya Muthukrishnan</strong> — SIMATS University Web Tech Lab</footer>
+</div>
+
+<script>
+  // ===== QUESTION DATA =====
+  const questions = [
+    { question: "What does HTML stand for?", options: ["Hyper Text Markup Language","High Text Machine Language","Hyperlink Text Management","Home Tool Markup Language"], answer: "Hyper Text Markup Language" },
+    { question: "Which CSS property changes text color?", options: ["font-color","text-color","color","background-color"], answer: "color" },
+    { question: "Which JS method adds an element to the end of an array?", options: ["push()","pop()","shift()","unshift()"], answer: "push()" },
+    { question: "What does DOM stand for?", options: ["Document Object Model","Data Object Model","Document Order Model","Digital Object Model"], answer: "Document Object Model" },
+    { question: "Which tag is used to link a CSS file in HTML?", options: ["<style>","<script>","<link>","<css>"], answer: "<link>" },
+    { question: "Which symbol is used for comments in JavaScript?", options: ["<!-- -->","//","**","##"], answer: "//" },
+    { question: "Which CSS layout model uses main-axis and cross-axis?", options: ["Grid","Flexbox","Float","Table"], answer: "Flexbox" },
+    { question: "Which method converts a JSON string into a JS object?", options: ["JSON.stringify()","JSON.parse()","JSON.convert()","JSON.toObject()"], answer: "JSON.parse()" },
+    { question: "Which HTML attribute makes an input field required?", options: ["mandatory","required","validate","needed"], answer: "required" },
+    { question: "Which event fires when a user clicks a button?", options: ["onchange","onclick","onhover","onsubmit"], answer: "onclick" }
+  ];
+
+  let currentIndex = 0;
+  let score = 0;
+  let correctCount = 0;
+  let wrongCount = 0;
+  let selectedOption = null;
+  let answered = false;
+
+  const questionText = document.getElementById('questionText');
+  const optionsContainer = document.getElementById('optionsContainer');
+  const qCounter = document.getElementById('qCounter');
+  const liveScore = document.getElementById('liveScore');
+  const progressFill = document.getElementById('progressFill');
+  const nextBtn = document.getElementById('nextBtn');
+  const quizScreen = document.getElementById('quizScreen');
+  const resultScreen = document.getElementById('resultScreen');
+
+  function loadQuestion(){
+    answered = false;
+    selectedOption = null;
+    nextBtn.disabled = true;
+    nextBtn.textContent = (currentIndex === questions.length - 1) ? "FINISH ✓" : "NEXT →";
+
+    const q = questions[currentIndex];
+    questionText.textContent = q.question;
+    qCounter.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+    liveScore.textContent = `Score: ${score}`;
+    progressFill.style.width = `${((currentIndex) / questions.length) * 100}%`;
+
+    optionsContainer.innerHTML = "";
+    q.options.forEach(opt => {
+      const div = document.createElement('div');
+      div.className = "option";
+      div.innerHTML = `<span class="radio"></span><span>${opt}</span><span class="mark"></span>`;
+      div.addEventListener('click', () => selectOption(div, opt));
+      optionsContainer.appendChild(div);
+    });
+  }
+
+  function selectOption(el, opt){
+    if (answered) return;
+    answered = true;
+    selectedOption = opt;
+
+    const q = questions[currentIndex];
+    const allOptions = document.querySelectorAll('.option');
+
+    allOptions.forEach(o => {
+      o.classList.add('disabled');
+      const text = o.querySelector('span:nth-child(2)').textContent;
+      if (text === q.answer){
+        o.classList.add('correct');
+        o.querySelector('.mark').textContent = "✅";
+      } else if (text === opt && opt !== q.answer){
+        o.classList.add('wrong');
+        o.querySelector('.mark').textContent = "❌";
+      }
+    });
+
+    if (opt === q.answer){
+      score++;
+      correctCount++;
+    } else {
+      wrongCount++;
+    }
+
+    liveScore.textContent = `Score: ${score}`;
+    nextBtn.disabled = false;
+  }
+
+  nextBtn.addEventListener('click', () => {
+    if (currentIndex < questions.length - 1){
+      currentIndex++;
+      loadQuestion();
+    } else {
+      finishQuiz();
+    }
+  });
+
+  function finishQuiz(){
+    progressFill.style.width = "100%";
+    quizScreen.style.display = "none";
+    resultScreen.classList.add('active');
+
+    const total = questions.length;
+    const percent = Math.round((score / total) * 100);
+
+    document.getElementById('scoreFraction').textContent = `${score} / ${total}`;
+    document.getElementById('scorePercent').textContent = `${percent}%`;
+    document.getElementById('correctCount').textContent = correctCount;
+    document.getElementById('wrongCount').textContent = wrongCount;
+    document.getElementById('scoreCircle').style.setProperty('--pct', percent);
+
+    const msgEl = document.getElementById('performanceMsg');
+    const emojiEl = document.querySelector('.result-emoji');
+    if (percent >= 90){
+      msgEl.textContent = "🏆 OUTSTANDING!";
+      msgEl.className = "performance-msg perf-great";
+      emojiEl.textContent = "🏆";
+    } else if (percent >= 70){
+      msgEl.textContent = "🎉 GREAT JOB!";
+      msgEl.className = "performance-msg perf-great";
+      emojiEl.textContent = "🎉";
+    } else if (percent >= 50){
+      msgEl.textContent = "👍 GOOD EFFORT!";
+      msgEl.className = "performance-msg perf-good";
+      emojiEl.textContent = "👍";
+    } else if (percent >= 30){
+      msgEl.textContent = "📘 KEEP PRACTICING!";
+      msgEl.className = "performance-msg perf-okay";
+      emojiEl.textContent = "📘";
+    } else {
+      msgEl.textContent = "💪 DON'T GIVE UP, TRY AGAIN!";
+      msgEl.className = "performance-msg perf-retry";
+      emojiEl.textContent = "💪";
+    }
+  }
+
+  document.getElementById('restartBtn').addEventListener('click', () => {
+    currentIndex = 0;
+    score = 0;
+    correctCount = 0;
+    wrongCount = 0;
+    resultScreen.classList.remove('active');
+    quizScreen.style.display = "block";
+    loadQuestion();
+  });
+
+  // initial load
+  loadQuestion();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIMATS Student Registration & Validation Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B1626;
+    --panel:#121F35;
+    --panel-2:#17273F;
+    --field:#0E1C30;
+    --line: rgba(237,239,244,0.10);
+    --line-strong: rgba(237,239,244,0.20);
+    --text:#EDEFF4;
+    --muted:#8CA0BD;
+    --teal:#2DD9C4;
+    --teal-dim: rgba(45,217,196,0.14);
+    --amber:#F2B84B;
+    --red:#F0716B;
+    --red-dim: rgba(240,113,107,0.12);
+    --green:#3FE07C;
+    --green-dim: rgba(63,224,124,0.12);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 10% -10%, rgba(45,217,196,0.10), transparent 42%),
+      radial-gradient(circle at 92% 6%, rgba(242,184,75,0.07), transparent 40%),
+      var(--ink);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    line-height:1.55;
+    padding:36px 5% 60px;
+  }
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif; margin:0;}
+
+  .top{max-width:640px; margin:0 auto 30px; text-align:center;}
+  .eyebrow{font-family:'JetBrains Mono'; font-size:11.5px; letter-spacing:2px; color:var(--teal); text-transform:uppercase; margin-bottom:12px;}
+  .top h1{font-size:clamp(24px,3.4vw,32px); font-weight:600; margin-bottom:8px;}
+  .top p{color:var(--muted); font-size:14.5px; margin:0;}
+
+  .portal{
+    max-width:640px; margin:0 auto;
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:20px; padding:8px;
+    box-shadow:0 30px 60px -30px rgba(0,0,0,0.6);
+  }
+
+  /* ---------- Checkpoint rail ---------- */
+  .rail{display:flex; align-items:center; padding:20px 22px 22px;}
+  .stop{display:flex; flex-direction:column; align-items:center; gap:8px; flex:1; position:relative;}
+  .stop .dot{
+    width:32px; height:32px; border-radius:50%;
+    background:var(--field); border:1.5px solid var(--line-strong);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono'; font-size:12.5px; color:var(--muted);
+    transition:.25s; z-index:2;
+  }
+  .stop .label{font-size:11px; color:var(--muted); text-align:center;}
+  .stop.done .dot{background:var(--teal); border-color:var(--teal); color:#04241F;}
+  .stop.active .dot{border-color:var(--teal); color:var(--teal); box-shadow:0 0 0 4px var(--teal-dim);}
+  .stop.active .label, .stop.done .label{color:var(--text);}
+  .track{position:absolute; top:16px; left:calc(50% + 20px); right:calc(-50% + 20px); height:2px; background:var(--line-strong); z-index:1;}
+  .stop.done .track{background:var(--teal);}
+  .stop:last-child .track{display:none;}
+
+  /* ---------- Steps ---------- */
+  .step{display:none; padding:6px 26px 22px;}
+  .step.active{display:block; animation:fade .35s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+
+  .step-head{display:flex; align-items:center; gap:10px; margin-bottom:20px;}
+  .step-head .tag{
+    width:30px; height:30px; border-radius:9px; background:var(--teal-dim); color:var(--teal);
+    display:flex; align-items:center; justify-content:center; font-size:15px;
+  }
+  .step-head h2{font-size:17px; font-weight:600;}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:12.5px; color:var(--muted); margin-bottom:6px; letter-spacing:.2px;}
+  .field input, .field select, .field textarea{
+    width:100%; background:var(--field); border:1px solid var(--line-strong); border-radius:10px;
+    padding:11px 13px; color:var(--text); font-size:14.5px; font-family:'Inter';
+    outline:none; transition:.2s;
+  }
+  .field textarea{resize:vertical; min-height:64px;}
+  .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--teal); box-shadow:0 0 0 3px var(--teal-dim);}
+  .field.invalid input, .field.invalid select, .field.invalid textarea{border-color:var(--red); box-shadow:0 0 0 3px var(--red-dim);}
+  .field.valid input, .field.valid select{border-color:var(--green);}
+
+  .msg{font-size:12px; margin-top:6px; display:none; align-items:center; gap:6px;}
+  .msg.show{display:flex;}
+  .msg.err{color:var(--red);}
+  .msg.ok{color:var(--green);}
+
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:520px){.row2{grid-template-columns:1fr;}}
+
+  .radio-group{display:flex; gap:10px; flex-wrap:wrap;}
+  .radio-group label{
+    display:flex; align-items:center; gap:6px; font-size:13.5px; color:var(--muted);
+    background:var(--field); border:1px solid var(--line-strong); border-radius:30px;
+    padding:8px 14px; cursor:pointer; margin:0; transition:.2s;
+  }
+  .radio-group input{width:auto; margin:0;}
+  .radio-group input:checked + span{color:var(--text);}
+  .radio-group label:has(input:checked){border-color:var(--teal); background:var(--teal-dim); color:var(--text);}
+
+  .chip-group{display:flex; gap:8px; flex-wrap:wrap;}
+  .chip{
+    font-size:12.5px; padding:8px 14px; border-radius:30px;
+    background:var(--field); border:1px solid var(--line-strong); color:var(--muted);
+    cursor:pointer; user-select:none; transition:.2s;
+  }
+  .chip.picked{background:var(--teal-dim); border-color:var(--teal); color:var(--text);}
+
+  /* ---------- Password strength ---------- */
+  .strength-wrap{margin-top:8px;}
+  .strength-bars{display:flex; gap:5px; margin-bottom:6px;}
+  .strength-bars i{flex:1; height:6px; border-radius:4px; background:var(--line-strong); transition:.25s;}
+  .strength-label{font-family:'JetBrains Mono'; font-size:11.5px; color:var(--muted);}
+
+  /* ---------- Nav buttons ---------- */
+  .nav-btns{display:flex; justify-content:space-between; gap:12px; padding-top:6px;}
+  button{
+    font-family:'Inter'; font-size:14px; font-weight:500; cursor:pointer;
+    border-radius:30px; padding:11px 22px; border:1px solid var(--line-strong);
+    background:transparent; color:var(--text); transition:.2s;
+  }
+  button.primary{background:var(--teal); border-color:var(--teal); color:#04241F;}
+  button.primary:hover{background:#25c2af;}
+  button.ghost:hover{background:var(--panel-2);}
+  button:disabled{opacity:0.4; cursor:not-allowed;}
+
+  /* ---------- Success card ---------- */
+  .success{padding:30px 26px 34px; text-align:center;}
+  .success .check{
+    width:56px; height:56px; border-radius:50%; background:var(--green-dim); color:var(--green);
+    display:flex; align-items:center; justify-content:center; font-size:26px; margin:0 auto 16px;
+  }
+  .success h2{font-size:19px; margin-bottom:6px;}
+  .success p{color:var(--muted); font-size:14px; margin:0 0 22px;}
+
+  .id-preview{
+    max-width:340px; margin:0 auto; text-align:left;
+    background:linear-gradient(160deg, var(--panel-2), var(--field));
+    border:1px solid var(--line-strong); border-radius:16px; padding:20px;
+  }
+  .id-preview .idp-name{font-size:16px; font-weight:600;}
+  .id-preview .idp-reg{font-family:'JetBrains Mono'; font-size:12px; color:var(--teal); margin-bottom:12px;}
+  .id-preview .idp-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; font-size:12.5px;}
+  .id-preview .idp-grid span{display:block; color:var(--muted); font-size:10.5px; text-transform:uppercase; letter-spacing:.5px;}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="eyebrow">SIMATS Student Portal · Onboarding</div>
+  <h1>Student Registration &amp; Validation Portal</h1>
+  <p>Four quick checkpoints to set up your student account.</p>
+</div>
+
+<div class="portal">
+
+  <div class="rail" id="rail">
+    <div class="stop active" data-step="1"><div class="dot">1</div><div class="label">Personal</div><div class="track"></div></div>
+    <div class="stop" data-step="2"><div class="dot">2</div><div class="label">Contact</div><div class="track"></div></div>
+    <div class="stop" data-step="3"><div class="dot">3</div><div class="label">Academic</div><div class="track"></div></div>
+    <div class="stop" data-step="4"><div class="dot">4</div><div class="label">Account</div><div class="track"></div></div>
+  </div>
+
+  <form id="onboardForm" novalidate>
+
+    <!-- STEP 1: Personal -->
+    <div class="step active" data-step="1">
+      <div class="step-head"><div class="tag">&#128100;</div><h2>Personal information</h2></div>
+
+      <div class="field" id="f-name">
+        <label for="fullName">Full name</label>
+        <input type="text" id="fullName" placeholder="Kaviya Muthukrishnan">
+        <div class="msg err"><span>&#10060;</span><span class="txt">Name cannot be empty</span></div>
+        <div class="msg ok"><span>&#9989;</span><span class="txt">Looks good</span></div>
+      </div>
+
+      <div class="field" id="f-reg">
+        <label for="regNo">Register number</label>
+        <input type="text" id="regNo" placeholder="192211045">
+        <div class="msg err"><span>&#10060;</span><span class="txt">Register number is required</span></div>
+        <div class="msg ok"><span>&#9989;</span><span class="txt">Register number saved</span></div>
+      </div>
+
+      <div class="row2">
+        <div class="field" id="f-dob">
+          <label for="dob">Date of birth</label>
+          <input type="date" id="dob">
+          <div class="msg err"><span>&#10060;</span><span class="txt">Please select your date of birth</span></div>
+        </div>
+        <div class="field">
+          <label>Gender</label>
+          <div class="radio-group" id="genderGroup">
+            <label><input type="radio" name="gender" value="Female"><span>Female</span></label>
+            <label><input type="radio" name="gender" value="Male"><span>Male</span></label>
+            <label><input type="radio" name="gender" value="Other"><span>Other</span></label>
+          </div>
+          <div class="msg err" id="genderMsg"><span>&#10060;</span><span class="txt">Please select a gender</span></div>
+        </div>
+      </div>
+
+      <div class="nav-btns">
+        <button type="button" class="ghost" disabled>Back</button>
+        <button type="button" class="primary" data-next>Continue</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Contact -->
+    <div class="step" data-step="2">
+      <div class="step-head"><div class="tag">&#128231;</div><h2>Contact information</h2></div>
+
+      <div class="field" id="f-email">
+        <label for="email">Email address</label>
+        <input type="text" id="email" placeholder="kaviya.m@simats.edu.in">
+        <div class="msg err"><span>&#10060;</span><span class="txt">Invalid email format</span></div>
+        <div class="msg ok"><span>&#9989;</span><span class="txt">Email format is valid</span></div>
+      </div>
+
+      <div class="field" id="f-mobile">
+        <label for="mobile">Mobile number</label>
+        <input type="text" id="mobile" maxlength="10" placeholder="9876543210">
+        <div class="msg err"><span>&#10060;</span><span class="txt">Mobile number must be exactly 10 digits</span></div>
+        <div class="msg ok"><span>&#9989;</span><span class="txt">Mobile number is valid</span></div>
+      </div>
+
+      <div class="field" id="f-address">
+        <label for="address">Address</label>
+        <textarea id="address" placeholder="Door no., street, city, state, PIN"></textarea>
+        <div class="msg err"><span>&#10060;</span><span class="txt">Address cannot be empty</span></div>
+      </div>
+
+      <div class="nav-btns">
+        <button type="button" class="ghost" data-back>Back</button>
+        <button type="button" class="primary" data-next>Continue</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Academic -->
+    <div class="step" data-step="3">
+      <div class="step-head"><div class="tag">&#127891;</div><h2>Academic information</h2></div>
+
+      <div class="row2">
+        <div class="field" id="f-dept">
+          <label for="dept">Department</label>
+          <select id="dept">
+            <option value="">Select department</option>
+            <option>Information Technology</option>
+            <option>Computer Science &amp; Engineering</option>
+            <option>Electronics &amp; Communication</option>
+            <option>Mechanical Engineering</option>
+            <option>Biomedical Engineering</option>
+          </select>
+          <div class="msg err"><span>&#10060;</span><span class="txt">Please select a department</span></div>
+        </div>
+        <div class="field" id="f-year">
+          <label for="year">Year</label>
+          <select id="year">
+            <option value="">Select year</option>
+            <option>I Year</option>
+            <option>II Year</option>
+            <option>III Year</option>
+            <option>IV Year</option>
+          </select>
+          <div class="msg err"><span>&#10060;</span><span class="txt">Please select a year</span></div>
+        </div>
+      </div>
+
+      <div class="field" id="f-cgpa">
+        <label for="cgpa">CGPA</label>
+        <input type="text" id="cgpa" placeholder="8.5">
+        <div class="msg err"><span>&#10060;</span><span class="txt">CGPA must be between 0 and 10</span></div>
+        <div class="msg ok"><span>&#9989;</span><span class="txt">CGPA looks valid</span></div>
+      </div>
+
+      <div class="field">
+        <label>Skills</label>
+        <div class="chip-group" id="skillChips">
+          <div class="chip">HTML</div>
+          <div class="chip">CSS</div>
+          <div class="chip">JavaScript</div>
+          <div class="chip">Python</div>
+          <div class="chip">Java</div>
+          <div class="chip">SQL</div>
+        </div>
+      </div>
+
+      <div class="nav-btns">
+        <button type="button" class="ghost" data-back>Back</button>
+        <button type="button" class="primary" data-next>Continue</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Account -->
+    <div class="step" data-step="4">
+      <div class="step-head"><div class="tag">&#128274;</div><h2>Account information</h2></div>
+
+      <div class="field" id="f-username">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="kaviya_m">
+        <div class="msg err"><span>&#10060;</span><span class="txt">Username cannot be empty</span></div>
+        <div class="msg ok"><span>&#9989;</span><span class="txt">Username available</span></div>
+      </div>
+
+      <div class="field" id="f-password">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Minimum 8 characters">
+        <div class="strength-wrap">
+          <div class="strength-bars"><i></i><i></i><i></i></div>
+          <div class="strength-label" id="strengthLabel">Password strength</div>
+        </div>
+        <div class="msg err"><span>&#10060;</span><span class="txt">Password must be at least 8 characters</span></div>
+      </div>
+
+      <div class="field" id="f-confirm">
+        <label for="confirm">Confirm password</label>
+        <input type="password" id="confirm" placeholder="Re-enter your password">
+        <div class="msg err"><span>&#10060;</span><span class="txt">Passwords do not match</span></div>
+        <div class="msg ok"><span>&#9989;</span><span class="txt">Passwords match</span></div>
+      </div>
+
+      <div class="nav-btns">
+        <button type="button" class="ghost" data-back>Back</button>
+        <button type="submit" class="primary">Create account</button>
+      </div>
+    </div>
+
+  </form>
+
+  <!-- SUCCESS -->
+  <div class="success" id="successPanel" style="display:none;">
+    <div class="check">&#10003;</div>
+    <h2>Account created</h2>
+    <p>Your student profile has been registered with SIMATS Student Portal.</p>
+    <div class="id-preview">
+      <div class="idp-name" id="pvName">—</div>
+      <div class="idp-reg" id="pvReg">—</div>
+      <div class="idp-grid">
+        <div><span>Department</span><b id="pvDept">—</b></div>
+        <div><span>Year</span><b id="pvYear">—</b></div>
+        <div><span>Email</span><b id="pvEmail">—</b></div>
+        <div><span>Mobile</span><b id="pvMobile">—</b></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const steps = document.querySelectorAll('.step');
+  const stops = document.querySelectorAll('.stop');
+  let current = 1;
+
+  function showStep(n){
+    steps.forEach(s => s.classList.toggle('active', +s.dataset.step === n));
+    stops.forEach(s => {
+      const idx = +s.dataset.step;
+      s.classList.toggle('active', idx === n);
+      s.classList.toggle('done', idx < n);
+    });
+    current = n;
+  }
+
+  function setField(id, ok){
+    const field = document.getElementById(id);
+    field.classList.toggle('invalid', ok === false);
+    field.classList.toggle('valid', ok === true);
+    const errMsg = field.querySelector('.msg.err');
+    const okMsg = field.querySelector('.msg.ok');
+    if(errMsg) errMsg.classList.toggle('show', ok === false);
+    if(okMsg) okMsg.classList.toggle('show', ok === true);
+  }
+
+  function validateStep(n){
+    let valid = true;
+
+    if(n === 1){
+      const name = document.getElementById('fullName').value.trim();
+      const reg = document.getElementById('regNo').value.trim();
+      const dob = document.getElementById('dob').value;
+      const gender = document.querySelector('input[name="gender"]:checked');
+
+      setField('f-name', name.length > 0 ? true : false);
+      if(!name) valid = false;
+
+      setField('f-reg', reg.length > 0 ? true : false);
+      if(!reg) valid = false;
+
+      document.getElementById('f-dob').classList.toggle('invalid', !dob);
+      document.querySelector('#f-dob .msg.err').classList.toggle('show', !dob);
+      if(!dob) valid = false;
+
+      document.getElementById('genderMsg').classList.toggle('show', !gender);
+      if(!gender) valid = false;
+    }
+
+    if(n === 2){
+      const email = document.getElementById('email').value.trim();
+      const mobile = document.getElementById('mobile').value.trim();
+      const address = document.getElementById('address').value.trim();
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      const mobileOk = /^\d{10}$/.test(mobile);
+
+      setField('f-email', email.length ? emailOk : false);
+      if(!emailOk) valid = false;
+
+      setField('f-mobile', mobile.length ? mobileOk : false);
+      if(!mobileOk) valid = false;
+
+      document.getElementById('f-address').classList.toggle('invalid', !address);
+      document.querySelector('#f-address .msg.err').classList.toggle('show', !address);
+      if(!address) valid = false;
+    }
+
+    if(n === 3){
+      const dept = document.getElementById('dept').value;
+      const year = document.getElementById('year').value;
+      const cgpaRaw = document.getElementById('cgpa').value.trim();
+      const cgpa = parseFloat(cgpaRaw);
+      const cgpaOk = cgpaRaw !== '' && !isNaN(cgpa) && cgpa >= 0 && cgpa <= 10;
+
+      document.getElementById('f-dept').classList.toggle('invalid', !dept);
+      document.querySelector('#f-dept .msg.err').classList.toggle('show', !dept);
+      if(!dept) valid = false;
+
+      document.getElementById('f-year').classList.toggle('invalid', !year);
+      document.querySelector('#f-year .msg.err').classList.toggle('show', !year);
+      if(!year) valid = false;
+
+      setField('f-cgpa', cgpaRaw.length ? cgpaOk : false);
+      if(!cgpaOk) valid = false;
+    }
+
+    if(n === 4){
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('confirm').value;
+      const passOk = password.length >= 8;
+      const matchOk = confirm.length > 0 && password === confirm;
+
+      setField('f-username', username.length ? true : false);
+      if(!username) valid = false;
+
+      document.getElementById('f-password').classList.toggle('invalid', !passOk);
+      document.querySelector('#f-password .msg.err').classList.toggle('show', !passOk);
+      if(!passOk) valid = false;
+
+      setField('f-confirm', confirm.length ? matchOk : false);
+      if(!matchOk) valid = false;
+    }
+
+    return valid;
+  }
+
+  document.querySelectorAll('[data-next]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if(validateStep(current)) showStep(current + 1);
+    });
+  });
+  document.querySelectorAll('[data-back]').forEach(btn => {
+    btn.addEventListener('click', () => showStep(current - 1));
+  });
+
+  /* live validation as user types */
+  document.getElementById('fullName').addEventListener('input', e => {
+    if(e.target.value.trim()) setField('f-name', true);
+  });
+  document.getElementById('regNo').addEventListener('input', e => {
+    if(e.target.value.trim()) setField('f-reg', true);
+  });
+  document.getElementById('email').addEventListener('input', e => {
+    const val = e.target.value.trim();
+    if(val) setField('f-email', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val));
+  });
+  document.getElementById('mobile').addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/\D/g,'').slice(0,10);
+    const val = e.target.value;
+    if(val) setField('f-mobile', /^\d{10}$/.test(val));
+  });
+  document.getElementById('cgpa').addEventListener('input', e => {
+    const val = e.target.value.trim();
+    const num = parseFloat(val);
+    if(val) setField('f-cgpa', !isNaN(num) && num >= 0 && num <= 10);
+  });
+  document.getElementById('username').addEventListener('input', e => {
+    if(e.target.value.trim()) setField('f-username', true);
+  });
+  document.getElementById('confirm').addEventListener('input', () => {
+    const p = document.getElementById('password').value;
+    const c = document.getElementById('confirm').value;
+    if(c) setField('f-confirm', p === c && c.length > 0);
+  });
+
+  /* skill chips */
+  document.querySelectorAll('#skillChips .chip').forEach(chip => {
+    chip.addEventListener('click', () => chip.classList.toggle('picked'));
+  });
+
+  /* password strength meter */
+  const strengthBars = document.querySelectorAll('.strength-bars i');
+  const strengthLabel = document.getElementById('strengthLabel');
+  document.getElementById('password').addEventListener('input', e => {
+    const val = e.target.value;
+    let score = 0;
+    if(val.length >= 8) score++;
+    if(/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+    if(/\d/.test(val) && /[^A-Za-z0-9]/.test(val)) score++;
+
+    strengthBars.forEach((bar, i) => {
+      bar.style.background = i < score ? (score === 1 ? '#F0716B' : score === 2 ? '#F2B84B' : '#3FE07C') : 'rgba(237,239,244,0.20)';
+    });
+
+    strengthLabel.textContent = val.length === 0 ? 'Password strength'
+      : score <= 1 ? 'Weak password'
+      : score === 2 ? 'Medium strength'
+      : 'Strong password';
+
+    document.getElementById('f-password').classList.toggle('invalid', val.length > 0 && val.length < 8);
+    document.querySelector('#f-password .msg.err').classList.toggle('show', val.length > 0 && val.length < 8);
+  });
+
+  /* submit */
+  document.getElementById('onboardForm').addEventListener('submit', e => {
+    e.preventDefault();
+    if(!validateStep(4)) return;
+
+    document.getElementById('pvName').textContent = document.getElementById('fullName').value.trim();
+    document.getElementById('pvReg').textContent = 'REG NO · ' + document.getElementById('regNo').value.trim();
+    document.getElementById('pvDept').textContent = document.getElementById('dept').value;
+    document.getElementById('pvYear').textContent = document.getElementById('year').value;
+    document.getElementById('pvEmail').textContent = document.getElementById('email').value.trim();
+    document.getElementById('pvMobile').textContent = document.getElementById('mobile').value.trim();
+
+    document.getElementById('onboardForm').style.display = 'none';
+    document.getElementById('rail').style.display = 'none';
+    document.getElementById('successPanel').style.display = 'block';
+  });
+
+  showStep(1);
+</script>
+
+</body>
+</html>

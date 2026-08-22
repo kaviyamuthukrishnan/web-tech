@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Scientific Calculator – Student Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B1626;
+    --panel:#121F35;
+    --panel-2:#17273F;
+    --key:#152A45;
+    --key-hover:#1C3455;
+    --line: rgba(237,239,244,0.10);
+    --line-strong: rgba(237,239,244,0.20);
+    --text:#EDEFF4;
+    --muted:#8CA0BD;
+    --teal:#2DD9C4;
+    --teal-dim: rgba(45,217,196,0.16);
+    --amber:#F2B84B;
+    --amber-dim: rgba(242,184,75,0.16);
+    --red:#F0716B;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh;
+    background:
+      radial-gradient(circle at 8% -10%, rgba(45,217,196,0.10), transparent 42%),
+      radial-gradient(circle at 94% 4%, rgba(242,184,75,0.07), transparent 40%),
+      var(--ink);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    padding:36px 5% 60px;
+  }
+  h1,h2{font-family:'Space Grotesk', sans-serif; margin:0;}
+
+  .top{max-width:760px; margin:0 auto 30px; text-align:center;}
+  .eyebrow{font-family:'JetBrains Mono'; font-size:11.5px; letter-spacing:2px; color:var(--teal); text-transform:uppercase; margin-bottom:12px;}
+  .top h1{font-size:clamp(24px,3.4vw,32px); font-weight:600; margin-bottom:8px;}
+  .top p{color:var(--muted); font-size:14.5px; margin:0;}
+
+  .layout{
+    max-width:760px; margin:0 auto;
+    display:grid; grid-template-columns:1fr 220px; gap:18px;
+  }
+  @media (max-width:680px){ .layout{grid-template-columns:1fr;} }
+
+  /* ---------- Calculator body ---------- */
+  .calc{
+    background:linear-gradient(165deg, var(--panel), var(--panel-2));
+    border:1px solid var(--line-strong); border-radius:22px;
+    padding:20px; box-shadow:0 30px 60px -30px rgba(0,0,0,0.6);
+  }
+  .calc-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding:0 4px;}
+  .calc-head .brand{font-family:'JetBrains Mono'; font-size:12px; letter-spacing:2px; color:var(--amber);}
+  .mode-toggle{display:flex; background:var(--key); border:1px solid var(--line-strong); border-radius:20px; padding:3px;}
+  .mode-toggle button{
+    border:none; background:transparent; color:var(--muted); font-size:11.5px; font-family:'JetBrains Mono';
+    padding:6px 12px; border-radius:16px; cursor:pointer; transition:.2s;
+  }
+  .mode-toggle button.on{background:var(--teal); color:#04241F; font-weight:700;}
+
+  .display{
+    background:var(--ink); border:1px solid var(--line); border-radius:14px;
+    padding:18px 18px 14px; margin-bottom:14px; text-align:right; min-height:84px;
+    display:flex; flex-direction:column; justify-content:flex-end; gap:4px;
+    overflow:hidden;
+  }
+  .expr{
+    font-family:'JetBrains Mono'; font-size:15px; color:var(--muted);
+    white-space:nowrap; overflow-x:auto;
+  }
+  .result{
+    font-family:'Space Grotesk'; font-size:32px; font-weight:600;
+    white-space:nowrap; overflow-x:auto;
+  }
+  .result.error{color:var(--red); font-size:18px;}
+
+  .keys{display:grid; grid-template-columns:repeat(5,1fr); gap:8px;}
+  .key{
+    background:var(--key); border:1px solid var(--line); border-radius:10px;
+    color:var(--text); font-size:14px; font-family:'Inter'; font-weight:500;
+    padding:13px 0; text-align:center; cursor:pointer; user-select:none;
+    transition:.12s;
+  }
+  .key:hover{background:var(--key-hover);}
+  .key:active{transform:scale(0.94);}
+  .key.op{color:var(--teal);}
+  .key.fn{color:var(--amber); font-size:12.5px;}
+  .key.equals{background:var(--teal); color:#04241F; font-weight:700;}
+  .key.equals:hover{background:#25c2af;}
+  .key.clear{color:var(--red);}
+  .key.wide{grid-column:span 1;}
+
+  /* ---------- History panel ---------- */
+  .history-panel{
+    background:var(--panel); border:1px solid var(--line-strong); border-radius:18px;
+    padding:16px 16px 18px; display:flex; flex-direction:column;
+    max-height:520px;
+  }
+  .history-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .history-head span{font-family:'JetBrains Mono'; font-size:11.5px; letter-spacing:1.5px; color:var(--muted); text-transform:uppercase;}
+  .history-head button{
+    background:transparent; border:none; color:var(--muted); font-size:11px; cursor:pointer;
+    text-decoration:underline; padding:0;
+  }
+  .history-list{display:flex; flex-direction:column; gap:8px; overflow-y:auto; flex:1;}
+  .history-empty{color:var(--muted); font-size:12.5px; text-align:center; padding:20px 0;}
+  .h-item{
+    background:var(--key); border:1px solid var(--line); border-radius:10px;
+    padding:9px 11px; cursor:pointer; transition:.15s;
+  }
+  .h-item:hover{border-color:var(--teal);}
+  .h-item .h-expr{font-family:'JetBrains Mono'; font-size:11.5px; color:var(--muted); word-break:break-all;}
+  .h-item .h-res{font-family:'Space Grotesk'; font-size:14.5px; font-weight:600; margin-top:2px;}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="eyebrow">SIMATS Student Portal · Lab Utility</div>
+  <h1>Smart Scientific Calculator</h1>
+  <p>Basic and scientific operations with live calculation history — student edition.</p>
+</div>
+
+<div class="layout">
+
+  <div class="calc">
+    <div class="calc-head">
+      <span class="brand">SCI&#8209;CALC</span>
+      <div class="mode-toggle">
+        <button id="degBtn" class="on">DEG</button>
+        <button id="radBtn">RAD</button>
+      </div>
+    </div>
+
+    <div class="display">
+      <div class="expr" id="exprLine">&nbsp;</div>
+      <div class="result" id="resultLine">0</div>
+    </div>
+
+    <div class="keys" id="keys">
+      <div class="key fn" data-fn="(">(</div>
+      <div class="key fn" data-fn=")">)</div>
+      <div class="key fn" data-fn="ln(">ln</div>
+      <div class="key fn" data-fn="sq">x²</div>
+      <div class="key fn" data-op="^">x^y</div>
+
+      <div class="key fn" data-fn="sin(">sin</div>
+      <div class="key fn" data-fn="cos(">cos</div>
+      <div class="key fn" data-fn="tan(">tan</div>
+      <div class="key fn" data-fn="sqrt(">&#8730;</div>
+      <div class="key fn" data-fn="log(">log</div>
+
+      <div class="key" data-num="7">7</div>
+      <div class="key" data-num="8">8</div>
+      <div class="key" data-num="9">9</div>
+      <div class="key op" data-op="÷">&divide;</div>
+      <div class="key clear" data-action="clear">C</div>
+
+      <div class="key" data-num="4">4</div>
+      <div class="key" data-num="5">5</div>
+      <div class="key" data-num="6">6</div>
+      <div class="key op" data-op="×">&times;</div>
+      <div class="key op" data-op="%">%</div>
+
+      <div class="key" data-num="1">1</div>
+      <div class="key" data-num="2">2</div>
+      <div class="key" data-num="3">3</div>
+      <div class="key op" data-op="-">&minus;</div>
+      <div class="key clear" data-action="back">&#9003;</div>
+
+      <div class="key" data-num="0">0</div>
+      <div class="key" data-num=".">.</div>
+      <div class="key fn" data-fn="π">&pi;</div>
+      <div class="key op" data-op="+">+</div>
+      <div class="key equals" data-action="equals">=</div>
+    </div>
+  </div>
+
+  <div class="history-panel">
+    <div class="history-head">
+      <span>History</span>
+      <button id="clearHistory">Clear</button>
+    </div>
+    <div class="history-list" id="historyList">
+      <div class="history-empty">No calculations yet</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const exprLine = document.getElementById('exprLine');
+  const resultLine = document.getElementById('resultLine');
+  const historyList = document.getElementById('historyList');
+  const degBtn = document.getElementById('degBtn');
+  const radBtn = document.getElementById('radBtn');
+
+  let expr = '';
+  let angleMode = 'DEG';
+  let history = [];
+
+  function render(){
+    exprLine.textContent = expr.length ? expr : '\u00A0';
+    resultLine.classList.remove('error');
+    resultLine.textContent = expr.length ? '' : '0';
+  }
+
+  function toEvalString(raw){
+    let s = raw
+      .replace(/×/g, '*')
+      .replace(/÷/g, '/')
+      .replace(/\^/g, '**')
+      .replace(/π/g, '(PI)')
+      .replace(/sin\(/g, 'SIN(')
+      .replace(/cos\(/g, 'COS(')
+      .replace(/tan\(/g, 'TAN(')
+      .replace(/sqrt\(/g, 'SQRT(')
+      .replace(/log\(/g, 'LOG10(')
+      .replace(/ln\(/g, 'LN(');
+    return s;
+  }
+
+  function evaluate(raw){
+    const toRad = deg => deg * Math.PI / 180;
+    const SIN = x => angleMode === 'DEG' ? Math.sin(toRad(x)) : Math.sin(x);
+    const COS = x => angleMode === 'DEG' ? Math.cos(toRad(x)) : Math.cos(x);
+    const TAN = x => angleMode === 'DEG' ? Math.tan(toRad(x)) : Math.tan(x);
+    const SQRT = Math.sqrt;
+    const LOG10 = Math.log10;
+    const LN = Math.log;
+    const PI = Math.PI;
+
+    let s = toEvalString(raw);
+    /* handle trailing % as "divide by 100" applied to preceding number */
+    s = s.replace(/(\d+(\.\d+)?)%/g, '($1/100)');
+
+    /* eslint-disable no-new-func */
+    const fn = new Function('SIN','COS','TAN','SQRT','LOG10','LN','PI',
+      'return (' + s + ')');
+    return fn(SIN, COS, TAN, SQRT, LOG10, LN, PI);
+  }
+
+  function pushHistory(expression, result){
+    history.unshift({ expression, result });
+    if(history.length > 12) history.pop();
+    renderHistory();
+  }
+
+  function renderHistory(){
+    if(!history.length){
+      historyList.innerHTML = '<div class="history-empty">No calculations yet</div>';
+      return;
+    }
+    historyList.innerHTML = history.map(h =>
+      '<div class="h-item" data-load="' + encodeURIComponent(h.expression) + '">' +
+        '<div class="h-expr">' + h.expression + '</div>' +
+        '<div class="h-res">= ' + h.result + '</div>' +
+      '</div>'
+    ).join('');
+  }
+
+  document.getElementById('keys').addEventListener('click', e => {
+    const el = e.target.closest('.key');
+    if(!el) return;
+
+    if(el.dataset.num !== undefined){
+      expr += el.dataset.num;
+      render();
+      return;
+    }
+    if(el.dataset.op !== undefined){
+      expr += el.dataset.op;
+      render();
+      return;
+    }
+    if(el.dataset.fn !== undefined){
+      if(el.dataset.fn === 'sq'){
+        expr = '(' + (expr.length ? expr : '0') + ')^2';
+      } else {
+        expr += el.dataset.fn;
+      }
+      render();
+      return;
+    }
+    if(el.dataset.action === 'clear'){
+      expr = '';
+      render();
+      return;
+    }
+    if(el.dataset.action === 'back'){
+      expr = expr.slice(0, -1);
+      render();
+      return;
+    }
+    if(el.dataset.action === 'equals'){
+      if(!expr.length) return;
+      try{
+        const value = evaluate(expr);
+        if(value === undefined || Number.isNaN(value) || !Number.isFinite(value)){
+          resultLine.textContent = 'Math error';
+          resultLine.classList.add('error');
+          return;
+        }
+        const rounded = Math.round(value * 1e8) / 1e8;
+        resultLine.classList.remove('error');
+        resultLine.textContent = rounded;
+        pushHistory(expr, rounded);
+        expr = String(rounded);
+      } catch(err){
+        resultLine.textContent = 'Invalid expression';
+        resultLine.classList.add('error');
+      }
+    }
+  });
+
+  historyList.addEventListener('click', e => {
+    const item = e.target.closest('.h-item');
+    if(!item) return;
+    expr = decodeURIComponent(item.dataset.load);
+    render();
+  });
+
+  document.getElementById('clearHistory').addEventListener('click', () => {
+    history = [];
+    renderHistory();
+  });
+
+  degBtn.addEventListener('click', () => {
+    angleMode = 'DEG';
+    degBtn.classList.add('on');
+    radBtn.classList.remove('on');
+  });
+  radBtn.addEventListener('click', () => {
+    angleMode = 'RAD';
+    radBtn.classList.add('on');
+    degBtn.classList.remove('on');
+  });
+
+  window.addEventListener('keydown', e => {
+    if(/[0-9.+\-]/.test(e.key)){ expr += e.key; render(); }
+    else if(e.key === '*'){ expr += '×'; render(); }
+    else if(e.key === '/'){ expr += '÷'; render(); }
+    else if(e.key === 'Enter'){ document.querySelector('[data-action="equals"]').click(); }
+    else if(e.key === 'Backspace'){ expr = expr.slice(0,-1); render(); }
+    else if(e.key === 'Escape'){ expr = ''; render(); }
+  });
+
+  render();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Debugging Challenge Lab</title>
+<style>
+  :root{
+    --purple:#6C3CE9;
+    --pink:#FF3E9A;
+    --orange:#FF8A3D;
+    --teal:#1FC8C1;
+    --yellow:#FFC93C;
+    --blue:#2F6FED;
+    --green:#2ECC71;
+    --red:#FF4D5E;
+    --dark:#151022;
+    --code-bg:#1E1832;
+    --bg:#F6F4FF;
+    --card-bg:#ffffff;
+    --radius:18px;
+    --shadow:0 12px 30px rgba(108,60,233,0.16);
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; font-family:'Segoe UI','Trebuchet MS',sans-serif; }
+  body{
+    background:
+      radial-gradient(circle at 10% 10%, rgba(255,201,60,0.16), transparent 35%),
+      radial-gradient(circle at 90% 20%, rgba(31,200,193,0.18), transparent 40%),
+      var(--bg);
+    color:var(--dark);
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  code, pre{ font-family:'Consolas','Courier New',monospace; }
+
+  header{
+    background:linear-gradient(90deg,var(--purple),var(--pink));
+    color:#fff; text-align:center; padding:34px 5% 70px; position:relative; overflow:hidden;
+  }
+  header::before{ content:'🐞'; position:absolute; font-size:9rem; opacity:0.1; top:-20px; left:-10px; transform:rotate(-15deg); }
+  header::after{ content:'🔧'; position:absolute; font-size:8rem; opacity:0.12; bottom:-30px; right:0; transform:rotate(15deg); }
+  header h1{ font-size:clamp(1.6rem,4vw,2.4rem); font-weight:800; position:relative; z-index:2; }
+  header p{ margin-top:8px; opacity:0.9; position:relative; z-index:2; }
+
+  .container{ max-width:1100px; margin:-40px auto 0; padding:0 20px; position:relative; z-index:5; }
+
+  /* ===== SCOREBOARD ===== */
+  .scoreboard{
+    background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:24px 30px; margin-bottom:30px;
+    display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;
+  }
+  .score-stats{ display:flex; gap:26px; flex-wrap:wrap; }
+  .score-item{ text-align:center; }
+  .score-item h3{ font-size:1.5rem; }
+  .score-item p{ font-size:0.78rem; color:#8b83a0; }
+  #bugsFound h3{ color:var(--orange); }
+  #bugsFixed h3{ color:var(--green); }
+  #timerDisplay h3{ color:var(--blue); font-variant-numeric:tabular-nums; }
+  .badge-result{
+    font-weight:800; font-size:1rem; padding:10px 22px; border-radius:30px;
+    background:#F1ECFF; color:var(--purple); text-align:center;
+  }
+  .badge-result.expert{ background:linear-gradient(90deg,var(--yellow),var(--orange)); color:var(--dark); }
+
+  /* ===== BUG TABS ===== */
+  .bug-tabs{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px; }
+  .bug-tab{
+    flex:1 1 200px; background:var(--card-bg); border-radius:14px; box-shadow:var(--shadow);
+    padding:16px 18px; cursor:pointer; border:3px solid transparent; transition:.25s;
+    display:flex; align-items:center; gap:12px;
+  }
+  .bug-tab.active{ border-color:var(--purple); }
+  .bug-tab.solved{ opacity:0.65; }
+  .bug-tab .num{
+    width:34px; height:34px; border-radius:50%; background:#F1ECFF; color:var(--purple);
+    display:flex; align-items:center; justify-content:center; font-weight:800; flex-shrink:0;
+  }
+  .bug-tab.solved .num{ background:var(--green); color:#fff; }
+  .bug-tab .label{ font-size:0.88rem; font-weight:700; }
+  .bug-tab .sub{ font-size:0.72rem; color:#8b83a0; }
+
+  /* ===== BUG PANEL ===== */
+  .bug-panel{
+    background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:32px; margin-bottom:20px; display:none;
+  }
+  .bug-panel.active{ display:block; }
+  .bug-panel h2{ font-size:1.3rem; margin-bottom:6px; color:var(--purple); }
+  .bug-panel .desc{ color:#655f74; margin-bottom:22px; font-size:0.95rem; }
+
+  .demo-area{
+    background:#F8F6FF; border:2px dashed #D9CDFA; border-radius:14px; padding:24px; margin-bottom:20px;
+  }
+  .demo-area h4{ font-size:0.8rem; color:#8b83a0; letter-spacing:1px; margin-bottom:14px; text-transform:uppercase; }
+
+  /* login form demo for bug 1 & 2 */
+  .login-demo{ max-width:320px; margin:0 auto; }
+  .login-demo label{ display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px; }
+  .login-demo input{
+    width:100%; padding:10px 14px; border:2px solid #ECE7FA; border-radius:10px; margin-bottom:16px; font-size:0.9rem;
+  }
+  .login-demo-actions{ display:flex; }
+  .login-demo-actions.broken{ justify-content:flex-start; }
+  .login-demo-actions.fixed{ justify-content:center; }
+  .login-btn{
+    padding:11px 28px; border:none; border-radius:10px; font-weight:700; cursor:pointer;
+    background:var(--purple); color:#fff; transition:.2s;
+  }
+  .login-btn:hover{ background:var(--pink); }
+  .login-status{ text-align:center; margin-top:14px; font-weight:700; font-size:0.88rem; min-height:20px; }
+  .login-status.err{ color:var(--red); }
+  .login-status.ok{ color:var(--green); }
+
+  /* runtime error demo */
+  .runtime-demo{ text-align:center; }
+  .runtime-demo button{
+    padding:11px 26px; border:none; border-radius:10px; font-weight:700; cursor:pointer;
+    background:var(--blue); color:#fff; margin-bottom:14px;
+  }
+  .console-output{
+    background:var(--code-bg); color:#8CFFB0; border-radius:10px; padding:14px 16px;
+    text-align:left; font-size:0.85rem; min-height:50px; white-space:pre-wrap;
+  }
+  .console-output .err-line{ color:#FF7A85; }
+
+  /* logic error demo */
+  .logic-demo{ text-align:center; }
+  .logic-demo .result-box{
+    font-size:1.1rem; font-weight:700; margin:14px 0; padding:14px; background:#fff; border-radius:10px;
+  }
+
+  /* code compare */
+  .code-toggle{
+    display:flex; gap:10px; margin-bottom:14px;
+  }
+  .code-toggle button{
+    padding:9px 18px; border-radius:10px; border:2px solid #ECE7FA; background:#fff; cursor:pointer;
+    font-weight:700; font-size:0.85rem; color:var(--dark);
+  }
+  .code-toggle button.active{ background:var(--purple); color:#fff; border-color:var(--purple); }
+  .code-block{
+    background:var(--code-bg); color:#E4DEFB; border-radius:12px; padding:18px 20px;
+    font-size:0.85rem; line-height:1.7; overflow-x:auto; display:none;
+  }
+  .code-block.active{ display:block; }
+  .code-block .broken-line{ color:#FF7A85; }
+  .code-block .fixed-line{ color:#8CFFB0; }
+  .code-block .comment{ color:#7A7396; }
+
+  .hint-box{
+    background:#FFF8E3; border-left:4px solid var(--yellow); padding:12px 16px; border-radius:8px;
+    font-size:0.85rem; margin-bottom:18px; color:#8a6d0a;
+  }
+
+  .panel-actions{ display:flex; gap:12px; flex-wrap:wrap; margin-top:20px; }
+  .btn{
+    padding:12px 26px; border:none; border-radius:30px; font-weight:700; cursor:pointer; font-size:0.9rem;
+    transition:transform .2s;
+  }
+  .btn:hover{ transform:translateY(-2px); }
+  .btn-mark{ background:linear-gradient(90deg,var(--green),var(--teal)); color:#fff; }
+  .btn-mark:disabled{ opacity:0.5; cursor:not-allowed; transform:none; }
+  .btn-reset{ background:#F1ECFF; color:var(--purple); }
+
+  footer{ text-align:center; margin-top:20px; color:#8b83a0; font-size:0.85rem; }
+  footer strong{ color:var(--purple); }
+
+  @media (max-width:700px){
+    .bug-tabs{ flex-direction:column; }
+    .scoreboard{ flex-direction:column; align-items:stretch; text-align:center; }
+    .score-stats{ justify-content:center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🐞 WEB DEBUGGING CHALLENGE LAB</h1>
+  <p>Find it. Fix it. Prove you're an Expert Debugger.</p>
+</header>
+
+<div class="container">
+
+  <!-- SCOREBOARD -->
+  <div class="scoreboard">
+    <div class="score-stats">
+      <div class="score-item" id="bugsFound"><h3>0/4</h3><p>🐞 Bugs Found</p></div>
+      <div class="score-item" id="bugsFixed"><h3>0/4</h3><p>🔧 Bugs Fixed</p></div>
+      <div class="score-item" id="timerDisplay"><h3>00:00</h3><p>⏱ Time</p></div>
+    </div>
+    <div class="badge-result" id="resultBadge">Keep going...</div>
+  </div>
+
+  <!-- BUG TABS -->
+  <div class="bug-tabs" id="bugTabs">
+    <div class="bug-tab active" data-bug="1">
+      <div class="num">1</div>
+      <div><div class="label">CSS Bug</div><div class="sub">Button misaligned</div></div>
+    </div>
+    <div class="bug-tab" data-bug="2">
+      <div class="num">2</div>
+      <div><div class="label">JS Bug</div><div class="sub">Click does nothing</div></div>
+    </div>
+    <div class="bug-tab" data-bug="3">
+      <div class="num">3</div>
+      <div><div class="label">Runtime Error</div><div class="sub">Crash on click</div></div>
+    </div>
+    <div class="bug-tab" data-bug="4">
+      <div class="num">4</div>
+      <div><div class="label">Logic Error</div><div class="sub">Wrong answer</div></div>
+    </div>
+  </div>
+
+  <!-- BUG 1: CSS -->
+  <div class="bug-panel active" id="panel1">
+    <h2>Bug 1 — CSS: Button Is Not Aligned Correctly</h2>
+    <p class="desc">The Login button is stuck on the left instead of being centered under the form. Inspect the CSS and find the broken property.</p>
+
+    <div class="demo-area">
+      <h4>Live Preview</h4>
+      <div class="login-demo">
+        <label>Name</label>
+        <input type="text" placeholder="Enter your name">
+        <label>Password</label>
+        <input type="password" placeholder="Enter your password">
+        <div class="login-demo-actions" id="loginActionsWrap">
+          <button class="login-btn">LOGIN</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint-box">💡 Hint: Open DevTools → Elements → select the button's parent <code>.login-demo-actions</code> → check its <code>justify-content</code> value.</div>
+
+    <div class="code-toggle">
+      <button class="toggle-broken active" data-target="css">Show Broken CSS</button>
+      <button class="toggle-fixed" data-target="css">Show Fixed CSS</button>
+    </div>
+    <pre class="code-block active" id="cssBrokenBlock">.login-demo-actions {
+  display: flex;
+  <span class="broken-line">justify-content: flex-start;</span>  <span class="comment">/* ❌ pushes button to the left */</span>
+}</pre>
+    <pre class="code-block" id="cssFixedBlock">.login-demo-actions {
+  display: flex;
+  <span class="fixed-line">justify-content: center;</span>  <span class="comment">/* ✅ centers the button */</span>
+}</pre>
+
+    <div class="panel-actions">
+      <button class="btn btn-mark" data-bug="1">✓ Mark Bug 1 as Fixed</button>
+      <button class="btn btn-reset" data-bug="1">↺ Reset Demo</button>
+    </div>
+  </div>
+
+  <!-- BUG 2: JS click doesn't work -->
+  <div class="bug-panel" id="panel2">
+    <h2>Bug 2 — JavaScript: Button Click Doesn't Work</h2>
+    <p class="desc">Clicking LOGIN does nothing. Open the Console tab and check whether <code>addEventListener()</code> was ever attached.</p>
+
+    <div class="demo-area">
+      <h4>Live Preview</h4>
+      <div class="login-demo" style="text-align:center;">
+        <button class="login-btn" id="brokenLoginBtn">LOGIN</button>
+        <div class="login-status" id="loginStatus"></div>
+      </div>
+    </div>
+
+    <div class="hint-box">💡 Hint: Use <code>console.log()</code> inside the click handler to check if it even fires. If nothing logs, the listener was never attached — or attached to the wrong element ID.</div>
+
+    <div class="code-toggle">
+      <button class="toggle-broken active" data-target="js">Show Broken JS</button>
+      <button class="toggle-fixed" data-target="js">Show Fixed JS</button>
+    </div>
+    <pre class="code-block active" id="jsBrokenBlock"><span class="comment">// ❌ Wrong ID — listener never attaches to the real button</span>
+const btn = document.getElementById('<span class="broken-line">loginBtn</span>');
+btn.addEventListener('click', function() {
+  console.log('Login clicked');
+});</pre>
+    <pre class="code-block" id="jsFixedBlock"><span class="comment">// ✅ Correct ID matches the actual button</span>
+const btn = document.getElementById('<span class="fixed-line">brokenLoginBtn</span>');
+btn.addEventListener('click', function() {
+  console.log('Login clicked');
+  <span class="fixed-line">document.getElementById('loginStatus').textContent = '✅ Logged in!';</span>
+});</pre>
+
+    <div class="panel-actions">
+      <button class="btn btn-mark" data-bug="2">✓ Mark Bug 2 as Fixed</button>
+      <button class="btn btn-reset" data-bug="2">↺ Reset Demo</button>
+    </div>
+  </div>
+
+  <!-- BUG 3: Runtime Error -->
+  <div class="bug-panel" id="panel3">
+    <h2>Bug 3 — Runtime Error: App Crashes on Click</h2>
+    <p class="desc">Clicking "Load Profile" throws an error because the code tries to read a property from <code>undefined</code>. Wrap it safely using <code>try...catch</code>.</p>
+
+    <div class="demo-area runtime-demo">
+      <h4>Live Preview</h4>
+      <button id="loadProfileBtn">Load Profile</button>
+      <div class="console-output" id="consoleOutput">// console output appears here</div>
+    </div>
+
+    <div class="hint-box">💡 Hint: Open the Console panel — an uncaught <code>TypeError</code> stops the whole script. A <code>try...catch</code> block lets you handle it gracefully instead of crashing.</div>
+
+    <div class="code-toggle">
+      <button class="toggle-broken active" data-target="runtime">Show Broken JS</button>
+      <button class="toggle-fixed" data-target="runtime">Show Fixed JS</button>
+    </div>
+    <pre class="code-block active" id="runtimeBrokenBlock"><span class="comment">// ❌ No error handling — this throws and stops execution</span>
+function loadProfile() {
+  const user = <span class="broken-line">undefined</span>;
+  console.log(user.name); <span class="comment">// 💥 TypeError</span>
+}</pre>
+    <pre class="code-block" id="runtimeFixedBlock"><span class="fixed-line">try {</span>
+  const user = undefined;
+  console.log(user.name);
+<span class="fixed-line">} catch (error) {
+  console.log('Caught error:', error.message);
+}</span></pre>
+
+    <div class="panel-actions">
+      <button class="btn btn-mark" data-bug="3">✓ Mark Bug 3 as Fixed</button>
+      <button class="btn btn-reset" data-bug="3">↺ Reset Demo</button>
+    </div>
+  </div>
+
+  <!-- BUG 4: Logic Error -->
+  <div class="bug-panel" id="panel4">
+    <h2>Bug 4 — Logic Error: Wrong Calculation</h2>
+    <p class="desc">This calculator always shows the wrong total. There's no crash and no console error — the code runs fine, it's just wrong. Use <code>debugger;</code> and step through with breakpoints to catch it.</p>
+
+    <div class="demo-area logic-demo">
+      <h4>Live Preview</h4>
+      <p>Cart: 3 items × ₹150 each</p>
+      <div class="result-box" id="calcResult">Calculating...</div>
+      <button id="recalcBtn">Recalculate</button>
+    </div>
+
+    <div class="hint-box">💡 Hint: Set a breakpoint (or add <code>debugger;</code>) right before the return statement, then inspect each variable's value in the Sources panel — one of them is not what you'd expect.</div>
+
+    <div class="code-toggle">
+      <button class="toggle-broken active" data-target="logic">Show Broken JS</button>
+      <button class="toggle-fixed" data-target="logic">Show Fixed JS</button>
+    </div>
+    <pre class="code-block active" id="logicBrokenBlock">function calculateTotal(qty, price) {
+  <span class="comment">debugger; // pause here and inspect qty & price</span>
+  let total = qty <span class="broken-line">-</span> price; <span class="comment">// ❌ wrong operator</span>
+  return total;
+}</pre>
+    <pre class="code-block" id="logicFixedBlock">function calculateTotal(qty, price) {
+  let total = qty <span class="fixed-line">*</span> price; <span class="comment">// ✅ correct operator</span>
+  return total;
+}</pre>
+
+    <div class="panel-actions">
+      <button class="btn btn-mark" data-bug="4">✓ Mark Bug 4 as Fixed</button>
+      <button class="btn btn-reset" data-bug="4">↺ Reset Demo</button>
+    </div>
+  </div>
+
+  <footer>Built by <strong>Kaviya Muthukrishnan</strong> — SIMATS University Web Tech Lab</footer>
+</div>
+
+<script>
+  // ===== STATE =====
+  const bugStatus = { 1:false, 2:false, 3:false, 4:false };
+  let startTime = Date.now();
+  let timerInterval = null;
+  let finished = false;
+
+  // ===== TIMER =====
+  function startTimer(){
+    timerInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const mins = String(Math.floor(elapsed / 60)).padStart(2,'0');
+      const secs = String(elapsed % 60).padStart(2,'0');
+      document.querySelector('#timerDisplay h3').textContent = `${mins}:${secs}`;
+    }, 1000);
+  }
+  startTimer();
+
+  // ===== TAB SWITCHING =====
+  const bugTabs = document.querySelectorAll('.bug-tab');
+  const bugPanels = document.querySelectorAll('.bug-panel');
+
+  bugTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const bugNum = tab.dataset.bug;
+      bugTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      bugPanels.forEach(p => p.classList.remove('active'));
+      document.getElementById(`panel${bugNum}`).classList.add('active');
+    });
+  });
+
+  // ===== CODE TOGGLES (broken vs fixed) =====
+  document.querySelectorAll('.toggle-broken, .toggle-fixed').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.target;
+      const isBroken = btn.classList.contains('toggle-broken');
+      const parent = btn.parentElement;
+      parent.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const brokenBlock = document.getElementById(target + 'BrokenBlock');
+      const fixedBlock = document.getElementById(target + 'FixedBlock');
+      if (isBroken){
+        brokenBlock.classList.add('active');
+        fixedBlock.classList.remove('active');
+      } else {
+        fixedBlock.classList.add('active');
+        brokenBlock.classList.remove('active');
+      }
+    });
+  });
+
+  // ===== BUG 1: CSS demo — clicking reset shows the fix live =====
+  let bug1Fixed = false;
+  document.querySelector('#panel1 .btn-reset').addEventListener('click', () => {
+    bug1Fixed = !bug1Fixed;
+    const wrap = document.getElementById('loginActionsWrap');
+    wrap.classList.toggle('fixed', bug1Fixed);
+    wrap.classList.toggle('broken', !bug1Fixed);
+  });
+
+  // ===== BUG 2: JS click — the "broken" button DOES work here so students can see console.log() proving the fix =====
+  document.getElementById('brokenLoginBtn').addEventListener('click', () => {
+    console.log('Login clicked'); // this is what students check in DevTools Console
+    document.getElementById('loginStatus').textContent = '✅ Logged in! (event listener fired)';
+    document.getElementById('loginStatus').className = 'login-status ok';
+  });
+  document.querySelector('#panel2 .btn-reset').addEventListener('click', () => {
+    document.getElementById('loginStatus').textContent = '';
+  });
+
+  // ===== BUG 3: Runtime error demo using real try/catch =====
+  document.getElementById('loadProfileBtn').addEventListener('click', () => {
+    const output = document.getElementById('consoleOutput');
+    try {
+      const user = undefined;
+      console.log(user.name); // will throw
+      output.textContent = 'user loaded: ' + user.name;
+    } catch (error) {
+      output.innerHTML = `<span class="err-line">Caught error: ${error.message}</span>\n(Handled safely with try...catch — no crash!)`;
+    }
+  });
+  document.querySelector('#panel3 .btn-reset').addEventListener('click', () => {
+    document.getElementById('consoleOutput').textContent = '// console output appears here';
+  });
+
+  // ===== BUG 4: Logic error demo =====
+  function calculateTotalCorrect(qty, price){
+    // debugger; // uncomment in real DevTools to pause here
+    let total = qty * price; // fixed operator
+    return total;
+  }
+  function renderCalc(){
+    const result = calculateTotalCorrect(3, 150);
+    document.getElementById('calcResult').textContent = `Total: ₹${result}`;
+  }
+  document.getElementById('recalcBtn').addEventListener('click', renderCalc);
+  renderCalc();
+
+  // ===== MARK BUG AS FIXED =====
+  document.querySelectorAll('.btn-mark').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const bugNum = btn.dataset.bug;
+      if (!bugStatus[bugNum]){
+        bugStatus[bugNum] = true;
+        btn.disabled = true;
+        btn.textContent = "✅ Fixed!";
+        document.querySelector(`.bug-tab[data-bug="${bugNum}"]`).classList.add('solved');
+        updateScore();
+      }
+    });
+  });
+
+  function updateScore(){
+    const fixedCount = Object.values(bugStatus).filter(Boolean).length;
+    document.querySelector('#bugsFound h3').textContent = `${fixedCount}/4`;
+    document.querySelector('#bugsFixed h3').textContent = `${fixedCount}/4`;
+
+    const badge = document.getElementById('resultBadge');
+    if (fixedCount === 4 && !finished){
+      finished = true;
+      clearInterval(timerInterval);
+      badge.textContent = "🏆 EXPERT DEBUGGER";
+      badge.classList.add('expert');
+    } else if (fixedCount > 0) {
+      badge.textContent = `${fixedCount}/4 bugs squashed — keep going!`;
+    }
+  }
+</script>
+
+</body>
+</html>
