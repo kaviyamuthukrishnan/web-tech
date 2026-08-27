@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  This file is OPTIONAL if you're using Tomcat 7+ with the
+  @WebServlet("/StudentResultServlet") annotation already present
+  in StudentResultServlet.java — the annotation registers the
+  servlet automatically.
+
+  Keep this web.xml if:
+    - your Tomcat version does not process annotations, OR
+    - your instructor / lab setup requires an explicit web.xml.
+
+  If you use BOTH, make sure the url-pattern below matches the
+  action="StudentResultServlet" attribute in index.html.
+-->
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+         https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+         version="5.0">
+
+    <display-name>SIMATS Student Result Processing Portal</display-name>
+
+    <servlet>
+        <servlet-name>StudentResultServlet</servlet-name>
+        <servlet-class>StudentResultServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>StudentResultServlet</servlet-name>
+        <url-pattern>/StudentResultServlet</url-pattern>
+    </servlet-mapping>
+
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+
+</web-app>
