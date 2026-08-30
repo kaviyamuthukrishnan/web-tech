@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIMATS Engineering — Course Enrollment Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#101828;
+    --navy-soft:#1d2939;
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --blue:#2563eb;
+    --blue-dark:#1d4ed8;
+    --purple:#7c6ff0;
+    --purple-dark:#6355d1;
+    --amber:#f59e0b;
+    --amber-dark:#d97f06;
+    --coral:#fb7185;
+    --coral-dark:#e11d48;
+    --green:#16a34a;
+    --green-soft:#e8f7ee;
+    --red:#dc2626;
+    --red-soft:#fdeaea;
+    --border:#e6e9f2;
+    --text:#101828;
+    --mute:#667085;
+    --display:'Poppins', sans-serif;
+    --sans:'Inter', sans-serif;
+    --mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0; padding:0; background:var(--bg); color:var(--text); font-family:var(--sans);}
+  a{text-decoration:none; color:inherit;}
+  button, select, input{font-family:inherit;}
+
+  .app{display:flex; min-height:100vh;}
+
+  /* ===================== SIDEBAR ===================== */
+  .sidebar{
+    width:252px; flex-shrink:0; background:var(--navy); color:#fff;
+    display:flex; flex-direction:column; padding:26px 16px 20px;
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+  }
+  .logo-pill{
+    background:linear-gradient(135deg,var(--blue),var(--purple));
+    padding:12px 14px; border-radius:12px; text-align:center;
+    font-family:var(--display); font-weight:700; font-size:13.5px; letter-spacing:.03em;
+  }
+  .logo-sub{
+    text-align:center; font-size:11px; color:#9aa4c4; margin:10px 0 22px;
+    font-family:var(--mono); letter-spacing:.08em; text-transform:uppercase;
+  }
+  nav.side-nav{display:flex; flex-direction:column; gap:2px;}
+  nav.side-nav a{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 12px; border-radius:8px; font-size:13.5px; font-weight:500;
+    color:#c2c8de; border-left:3px solid transparent; transition:background .15s, color .15s;
+  }
+  nav.side-nav a .ic{font-size:15px; width:18px; text-align:center; opacity:.9;}
+  nav.side-nav a:hover{background:rgba(255,255,255,.06); color:#fff;}
+  nav.side-nav a.active{
+    background:rgba(124,111,240,.18); color:#fff; border-left-color:var(--purple);
+  }
+  .side-divider{height:1px; background:rgba(255,255,255,.1); margin:18px 4px;}
+  .side-footer{margin-top:auto; padding-top:16px;}
+  .term-chip{
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:10px;
+    padding:12px 14px; font-size:12px; color:#c2c8de;
+  }
+  .term-chip b{display:block; font-family:var(--display); font-size:15px; color:#fff; margin-bottom:8px;}
+  .dot-status{display:flex; align-items:center; gap:7px; margin-top:9px; font-family:var(--mono); font-size:10.5px; color:#9df0b4;}
+  .dot-status .dot{width:7px; height:7px; border-radius:50%; background:#22c55e; box-shadow:0 0 0 3px rgba(34,197,94,.2);}
+
+  /* ===================== MAIN ===================== */
+  .main{flex:1; min-width:0;}
+  .topbar{
+    background:#fff; border-bottom:1px solid var(--border);
+    padding:16px 32px; display:flex; align-items:center; gap:18px;
+    position:sticky; top:0; z-index:10;
+  }
+  .search-wrap{
+    flex:1; max-width:460px; position:relative;
+  }
+  .search-wrap input{
+    width:100%; padding:10px 14px 10px 38px; border-radius:10px; border:1px solid var(--border);
+    background:var(--bg); font-size:13.5px; outline:none;
+  }
+  .search-wrap input:focus{border-color:var(--blue); background:#fff;}
+  .search-wrap .sic{position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--mute); font-size:14px;}
+  .topbar-right{margin-left:auto; display:flex; align-items:center; gap:18px;}
+  .bell{font-size:17px; color:var(--mute); cursor:default;}
+  .profile{display:flex; align-items:center; gap:10px;}
+  .avatar{
+    width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--blue),var(--purple));
+    display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--display); font-weight:700; font-size:12.5px;
+  }
+  .profile-text b{display:block; font-size:13px; font-weight:600;}
+  .profile-text span{font-size:11px; color:var(--mute);}
+
+  .content{padding:30px 32px 70px; max-width:1180px;}
+  section{margin-top:46px; scroll-margin-top:90px;}
+  section:first-of-type{margin-top:0;}
+
+  .breadcrumb{font-family:var(--mono); font-size:11px; color:var(--mute); letter-spacing:.03em; margin-bottom:6px;}
+  h1.welcome{font-family:var(--display); font-size:27px; font-weight:700; margin:0 0 4px;}
+  .welcome-sub{color:var(--mute); font-size:13.5px; margin-bottom:24px;}
+
+  .sec-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px; gap:12px; flex-wrap:wrap;}
+  .sec-head h2{font-family:var(--display); font-weight:700; font-size:19px; margin:0;}
+  .sec-head .sec-tag{font-family:var(--mono); font-size:11px; color:var(--mute); background:#fff; border:1px solid var(--border); padding:3px 10px; border-radius:20px;}
+
+  /* stat cards */
+  .stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+  .stat-card{
+    border-radius:16px; padding:20px 20px 18px; color:#fff; position:relative; overflow:hidden;
+    box-shadow:0 8px 20px -8px rgba(16,24,40,.25);
+  }
+  .stat-card::after{content:""; position:absolute; right:-30px; bottom:-30px; width:110px; height:110px; border-radius:50%; background:rgba(255,255,255,.08);}
+  .stat-card .num{font-family:var(--display); font-size:32px; font-weight:800; line-height:1;}
+  .stat-card .lbl{margin-top:8px; font-size:13px; font-weight:600;}
+  .stat-card .sub{font-size:11.5px; opacity:.85; margin-top:4px;}
+  .stat-1{background:linear-gradient(135deg,#2563eb,#1d4ed8);}
+  .stat-2{background:linear-gradient(135deg,#9b8afb,#6355d1);}
+  .stat-3{background:linear-gradient(135deg,#fbbf46,#d97f06);}
+  .stat-4{background:linear-gradient(135deg,#fb8a8a,#e11d48);}
+
+  /* generic card */
+  .panel{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px 24px; box-shadow:0 4px 14px -10px rgba(16,24,40,.15);}
+
+  /* course explorer */
+  .explorer-grid{display:grid; grid-template-columns:300px 1fr; gap:20px;}
+  .explorer-controls label{display:block; font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--mute); margin:14px 0 6px;}
+  .explorer-controls label:first-child{margin-top:0;}
+  .explorer-controls input, .explorer-controls select{
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:var(--bg); font-size:13.5px; outline:none;
+  }
+  .explorer-controls input:focus, .explorer-controls select:focus{border-color:var(--blue); background:#fff;}
+  .suggest-list{margin-top:6px; border:1px solid var(--border); border-radius:10px; overflow:hidden; display:none; background:#fff;}
+  .suggest-list.show{display:block;}
+  .suggest-item{padding:9px 12px; font-size:12.5px; cursor:pointer; border-bottom:1px solid var(--border);}
+  .suggest-item:last-child{border-bottom:none;}
+  .suggest-item:hover{background:var(--bg);}
+  .suggest-item b{font-family:var(--mono); color:var(--blue-dark);}
+
+  .course-detail{
+    background:linear-gradient(180deg,#fff,#fbfbff); border:1px solid var(--border); border-radius:16px; padding:22px 24px;
+  }
+  .course-detail .cd-code{font-family:var(--mono); font-size:12px; color:var(--blue-dark); font-weight:600;}
+  .course-detail .cd-name{font-family:var(--display); font-size:20px; font-weight:700; margin:4px 0 16px;}
+  .cd-row{display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed var(--border); font-size:13.5px;}
+  .cd-row:last-of-type{border-bottom:none;}
+  .cd-row .k{color:var(--mute);}
+  .cd-row .v{font-weight:600;}
+  .type-pill{font-family:var(--mono); font-size:10.5px; padding:2px 9px; border-radius:20px; background:#eef2ff; color:var(--blue-dark); border:1px solid #c7d2fe;}
+  .bar-wrap{margin-top:16px;}
+  .bar-label{display:flex; justify-content:space-between; font-size:11.5px; color:var(--mute); margin-bottom:6px; font-family:var(--mono);}
+  .bar-track{background:#eef0f6; border-radius:20px; height:10px; overflow:hidden;}
+  .bar-fill{height:100%; border-radius:20px; transition:width .3s ease;}
+  .level-badge{display:inline-block; margin-top:10px; font-family:var(--mono); font-size:10.5px; padding:3px 10px; border-radius:20px; font-weight:600;}
+  .lvl-high{background:var(--red-soft); color:var(--red);}
+  .lvl-med{background:#fff6e5; color:var(--amber-dark);}
+  .lvl-low{background:#e8f0ff; color:var(--blue-dark);}
+  .ta-note{margin-top:12px; background:var(--red-soft); border:1px solid #f3c6c6; color:var(--red); padding:8px 12px; border-radius:8px; font-size:12px; font-weight:600; display:none;}
+  .ta-note.show{display:block;}
+
+  /* xpath explorer */
+  .xpath-toolbar{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px;}
+  .xpath-toolbar label{display:block; font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--mute); margin-bottom:6px;}
+  .xpath-toolbar select, .xpath-toolbar input{
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:var(--bg); font-size:13.5px; outline:none;
+  }
+  .xpath-toolbar select:focus, .xpath-toolbar input:focus{border-color:var(--blue); background:#fff;}
+  .xpath-code-box{
+    background:var(--navy); border-radius:12px; padding:14px 18px; margin-bottom:14px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  .xpath-code-box code{font-family:var(--mono); color:#dbeafe; font-size:13.5px;}
+  .xpath-status{display:flex; align-items:center; gap:12px; flex-shrink:0;}
+  .valid-flag{font-family:var(--mono); font-size:11px; color:#86efac; display:flex; align-items:center; gap:5px;}
+  .count-flag{font-family:var(--mono); font-size:11px; color:#fde68a;}
+  .xpath-results{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+  .result-card{
+    background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 16px;
+  }
+  .result-card .rc-code{font-family:var(--mono); font-size:11px; color:var(--blue-dark); font-weight:600;}
+  .result-card .rc-name{font-family:var(--display); font-size:14.5px; font-weight:600; margin:3px 0 8px;}
+  .rc-meta{display:flex; gap:8px; flex-wrap:wrap; font-size:11.5px; color:var(--mute);}
+  .rc-meta span{background:var(--bg); padding:2px 8px; border-radius:20px;}
+  .chip-grid{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{font-family:var(--mono); font-size:12px; padding:6px 12px; border-radius:20px; background:var(--bg); border:1px solid var(--border);}
+  .empty-note{color:var(--mute); font-size:13px; font-style:italic; padding:14px 4px;}
+
+  /* xslt */
+  .xslt-badges{display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;}
+  .badge{font-family:var(--mono); font-size:11px; padding:6px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg);}
+  .badge b{color:var(--navy);}
+  table.out-table{width:100%; border-collapse:collapse;}
+  table.out-table th{
+    text-align:left; padding:10px 12px; font-family:var(--mono); font-size:10.5px; text-transform:uppercase;
+    letter-spacing:.05em; color:var(--mute); border-bottom:2px solid var(--navy);
+  }
+  table.out-table td{padding:11px 12px; border-bottom:1px solid var(--border); font-size:13.5px;}
+  table.out-table tr:last-child td{border-bottom:none;}
+  .rank-badge{
+    display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%;
+    background:var(--navy); color:#fff; font-family:var(--mono); font-size:10.5px; margin-right:8px;
+  }
+  .students-val{font-family:var(--display); font-weight:700;}
+  .report-summary{margin-top:16px; background:var(--bg); border-radius:10px; padding:14px 16px; font-size:13px; color:var(--navy-soft); line-height:1.7;}
+  .report-summary b{color:var(--blue-dark);}
+
+  /* insights */
+  .insight-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
+  .insight-card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px 18px;}
+  .insight-card .il{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--mute); margin-bottom:8px;}
+  .insight-card .iv{font-family:var(--display); font-weight:700; font-size:16.5px; line-height:1.3;}
+  .insight-card .is{font-size:12px; color:var(--mute); margin-top:4px;}
+
+  /* support alert */
+  .alert-panel{background:var(--red-soft); border:1px solid #f3c6c6; border-radius:16px; padding:20px 24px;}
+  .alert-panel .ap-head{display:flex; align-items:center; gap:8px; margin-bottom:6px;}
+  .alert-panel .ap-head h2{font-family:var(--display); font-size:17px; font-weight:700; color:var(--red); margin:0;}
+  .alert-panel .ap-sub{font-size:12.5px; color:#9c3a3a; margin-bottom:14px;}
+  .alert-row{display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-top:1px dashed #f0b8b8;}
+  .alert-row:first-of-type{border-top:none;}
+  .alert-row .who{font-weight:600; font-size:13.5px;}
+  .alert-row .who span{color:var(--mute); font-weight:400; font-size:12px;}
+  .ta-tag{background:var(--red); color:#fff; font-family:var(--mono); font-size:10.5px; padding:3px 9px; border-radius:6px;}
+  .alert-footer{margin-top:14px; text-align:right; font-family:var(--mono); font-size:11px; color:var(--red); font-weight:600;}
+
+  /* xml structure */
+  .xml-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start;}
+  .kv-table{width:100%; border-collapse:collapse;}
+  .kv-table td{padding:9px 0; border-bottom:1px solid var(--border); font-size:13.5px;}
+  .kv-table tr:last-child td{border-bottom:none;}
+  .kv-table td:first-child{color:var(--mute); font-family:var(--mono); font-size:11.5px; width:150px;}
+  .kv-table td:last-child code{font-family:var(--mono); background:var(--bg); padding:2px 7px; border-radius:4px;}
+  .wf-box{background:var(--green-soft); border:1px solid #b7e4c7; border-radius:12px; padding:16px 18px;}
+  .wf-box .wf-flag{font-family:var(--mono); font-weight:700; color:var(--green); font-size:13px; display:flex; align-items:center; gap:6px; margin-bottom:8px;}
+  .wf-box ul{margin:0; padding-left:18px; font-size:12.5px; color:#2f6b45; line-height:1.8;}
+  .dataset-info{margin-top:14px; font-family:var(--mono); font-size:11px; color:var(--mute); display:flex; gap:18px; flex-wrap:wrap;}
+  .dataset-info b{color:var(--navy);}
+
+  footer.app-footer{
+    margin-top:56px; padding:22px 0 6px; border-top:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;
+    font-size:11.5px; color:var(--mute);
+  }
+  footer.app-footer .fmap{font-family:var(--mono); font-size:10.5px;}
+
+  @media (max-width:980px){
+    .sidebar{display:none;}
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .explorer-grid{grid-template-columns:1fr;}
+    .xpath-toolbar{grid-template-columns:1fr;}
+    .xpath-results{grid-template-columns:1fr 1fr;}
+    .insight-grid{grid-template-columns:1fr 1fr;}
+    .xml-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width:560px){
+    .xpath-results{grid-template-columns:1fr;}
+    .insight-grid{grid-template-columns:1fr;}
+    .content{padding:22px 16px 60px;}
+    .topbar{padding:14px 16px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <div class="logo-pill">SIMATS<br>ENGINEERING</div>
+    <div class="logo-sub">Academic Office</div>
+
+    <nav class="side-nav" id="sideNav">
+      <a href="#dashboard" class="active"><span class="ic">▣</span> Dashboard</a>
+      <a href="#explorer"><span class="ic">◉</span> Course Explorer</a>
+      <a href="#xpath"><span class="ic">⌕</span> XPath Analysis</a>
+      <a href="#xslt"><span class="ic">◈</span> XSLT Report</a>
+      <a href="#insights"><span class="ic">◇</span> Insights</a>
+      <a href="#support"><span class="ic">⚠</span> Support</a>
+      <a href="#xml"><span class="ic">{ }</span> XML Structure</a>
+    </nav>
+
+    <div class="side-divider"></div>
+
+    <div class="side-footer">
+      <div class="term-chip">
+        SEMESTER<b>2026–27</b>
+        <div class="dot-status"><span class="dot"></span> XML DATASET ACTIVE</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <div class="main">
+    <div class="topbar">
+      <div class="search-wrap">
+        <span class="sic">🔍</span>
+        <input type="text" id="globalSearch" placeholder="Search course code, name or faculty…">
+      </div>
+      <div class="topbar-right">
+        <span class="bell">🔔</span>
+        <div class="profile">
+          <div class="avatar">AO</div>
+          <div class="profile-text"><b>Academic Office</b><span>SIMATS Engineering</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD / OVERVIEW -->
+      <section id="dashboard">
+        <div class="breadcrumb">Academic Office / Course Analytics / Semester Report</div>
+        <h1 class="welcome">Course Enrollment Intelligence</h1>
+        <div class="welcome-sub">Academic workload analysis powered by XML, XPath &amp; XSLT — Semester 2026–27</div>
+
+        <div class="stat-grid">
+          <div class="stat-card stat-1">
+            <div class="num">05</div>
+            <div class="lbl">Total Courses</div>
+            <div class="sub">Offered this semester</div>
+          </div>
+          <div class="stat-card stat-2">
+            <div class="num">04</div>
+            <div class="lbl">Theory Courses</div>
+            <div class="sub">80% of catalogue</div>
+          </div>
+          <div class="stat-card stat-3">
+            <div class="num">03</div>
+            <div class="lbl">4-Credit Courses</div>
+            <div class="sub">Core workload</div>
+          </div>
+          <div class="stat-card stat-4">
+            <div class="num">72</div>
+            <div class="lbl">Highest Enrollment</div>
+            <div class="sub">AI302 · Artificial Intelligence</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COURSE EXPLORER -->
+      <section id="explorer">
+        <div class="sec-head">
+          <h2>📚 Course Explorer</h2>
+          <span class="sec-tag">Explore individual course records from the XML dataset</span>
+        </div>
+        <div class="panel">
+          <div class="explorer-grid">
+            <div class="explorer-controls">
+              <label>Search course</label>
+              <input type="text" id="courseSearch" placeholder="Code, name or faculty…" autocomplete="off">
+              <div class="suggest-list" id="suggestList"></div>
+
+              <label>Select course</label>
+              <select id="courseSelect"></select>
+            </div>
+
+            <div class="course-detail" id="courseDetail"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- XPATH EXPLORER -->
+      <section id="xpath">
+        <div class="sec-head">
+          <h2>🔬 XPath Query Explorer</h2>
+          <span class="sec-tag">Select a predefined analysis to query the XML dataset</span>
+        </div>
+        <div class="panel">
+          <div class="xpath-toolbar">
+            <div>
+              <label>Analysis</label>
+              <select id="xpathSelect"></select>
+            </div>
+            <div>
+              <label>Search results</label>
+              <input type="text" id="xpathSearch" placeholder="Filter current results…">
+            </div>
+          </div>
+
+          <div class="xpath-code-box">
+            <code id="xpathExpr">/courses/course</code>
+            <div class="xpath-status">
+              <span class="valid-flag">✓ VALID QUERY</span>
+              <span class="count-flag" id="xpathCount">5 matching records</span>
+            </div>
+          </div>
+
+          <div id="xpathResults" class="xpath-results"></div>
+        </div>
+      </section>
+
+      <!-- XSLT REPORT -->
+      <section id="xslt">
+        <div class="sec-head">
+          <h2>⚡ High Enrollment Course Report</h2>
+          <span class="sec-tag">XSLT transformation of the XML dataset</span>
+        </div>
+        <div class="panel">
+          <div class="xslt-badges">
+            <span class="badge">FILTER · <b>students &gt; 40</b></span>
+            <span class="badge">SORT · <b>students ↓ descending</b></span>
+            <span class="badge">OUTPUT · <b>valid HTML table</b></span>
+          </div>
+          <table class="out-table">
+            <tr><th>Code</th><th>Course Name</th><th>Faculty</th><th>Students</th><th>Credits</th><th>Type</th></tr>
+            <tbody id="xsltTableBody"></tbody>
+          </table>
+          <div class="report-summary" id="reportSummary"></div>
+        </div>
+      </section>
+
+      <!-- INSIGHTS -->
+      <section id="insights">
+        <div class="sec-head">
+          <h2>📊 Data Interpretation</h2>
+          <span class="sec-tag">Insights derived from the XML dataset</span>
+        </div>
+        <div class="insight-grid" id="insightGrid"></div>
+      </section>
+
+      <!-- SUPPORT ALERT -->
+      <section id="support">
+        <div class="alert-panel">
+          <div class="ap-head"><h2>🚨 Additional Teaching Support</h2></div>
+          <div class="ap-sub">Courses exceeding 60 students require an additional teaching assistant.</div>
+          <div id="alertRows"></div>
+          <div class="alert-footer" id="alertFooter"></div>
+        </div>
+      </section>
+
+      <!-- XML STRUCTURE -->
+      <section id="xml">
+        <div class="sec-head">
+          <h2>🧩 XML Data Structure</h2>
+          <span class="sec-tag">courses.xml</span>
+        </div>
+        <div class="panel">
+          <div class="xml-grid">
+            <table class="kv-table">
+              <tr><td>Root element</td><td><code>&lt;courses&gt;</code></td></tr>
+              <tr><td>Record element</td><td><code>&lt;course&gt;</code> × 5</td></tr>
+              <tr><td>Unique attribute</td><td><code>id</code> (e.g. <code>C101</code>–<code>C105</code>)</td></tr>
+              <tr><td>Numeric elements</td><td><code>&lt;students&gt;</code>, <code>&lt;credits&gt;</code></td></tr>
+            </table>
+            <div class="wf-box">
+              <div class="wf-flag">✓ WELL-FORMED XML</div>
+              <ul>
+                <li>Single root element (<code>courses</code>)</li>
+                <li>Every tag properly opened and closed</li>
+                <li>Correct, consistent nesting</li>
+                <li><code>id</code> attribute values are quoted</li>
+              </ul>
+            </div>
+          </div>
+          <div class="dataset-info">
+            <span>Source: <b>University Course XML Dataset</b></span>
+            <span>Records: <b>05</b></span>
+            <span>Status: <b style="color:var(--green)">Active</b></span>
+          </div>
+        </div>
+      </section>
+
+      <footer class="app-footer">
+        <span>SIMATS Engineering · University Academic Office · Course Enrollment Intelligence System</span>
+        <span class="fmap">XML Structure · XPath Selection · XSLT Transformation · Data Interpretation</span>
+      </footer>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const courses = [
+    {id:'C101', code:'WEB301', name:'Web Technology', faculty:'Dr. Arun', students:58, credits:4, type:'Theory'},
+    {id:'C102', code:'AI302', name:'Artificial Intelligence', faculty:'Dr. Meena', students:72, credits:4, type:'Theory'},
+    {id:'C103', code:'WEB303', name:'Web Technology Laboratory', faculty:'Dr. Ravi', students:36, credits:2, type:'Practical'},
+    {id:'C104', code:'ML304', name:'Machine Learning', faculty:'Dr. Priya', students:64, credits:4, type:'Theory'},
+    {id:'C105', code:'DB305', name:'Database Systems', faculty:'Dr. Kumar', students:42, credits:3, type:'Theory'}
+  ];
+
+  function levelInfo(students){
+    if(students > 60) return {cls:'lvl-high', label:'HIGH', bar:'linear-gradient(90deg,#fb7185,#e11d48)'};
+    if(students >= 40) return {cls:'lvl-med', label:'MEDIUM', bar:'linear-gradient(90deg,#fbbf46,#d97f06)'};
+    return {cls:'lvl-low', label:'LOW', bar:'linear-gradient(90deg,#60a5fa,#2563eb)'};
+  }
+
+  /* ---------- COURSE EXPLORER ---------- */
+  const courseSelect = document.getElementById('courseSelect');
+  const courseDetail = document.getElementById('courseDetail');
+  const courseSearch = document.getElementById('courseSearch');
+  const suggestList = document.getElementById('suggestList');
+  const globalSearch = document.getElementById('globalSearch');
+
+  courses.forEach(c=>{
+    const opt = document.createElement('option');
+    opt.value = c.code;
+    opt.textContent = c.code + ' — ' + c.name;
+    courseSelect.appendChild(opt);
+  });
+
+  function renderCourseDetail(course){
+    const lvl = levelInfo(course.students);
+    courseDetail.innerHTML = `
+      <div class="cd-code">${course.code} · ${course.id}</div>
+      <div class="cd-name">${course.name}</div>
+      <div class="cd-row"><span class="k">Faculty</span><span class="v">${course.faculty}</span></div>
+      <div class="cd-row"><span class="k">Students</span><span class="v">${course.students}</span></div>
+      <div class="cd-row"><span class="k">Credits</span><span class="v">${course.credits}</span></div>
+      <div class="cd-row"><span class="k">Type</span><span class="v"><span class="type-pill">${course.type}</span></span></div>
+      <div class="bar-wrap">
+        <div class="bar-label"><span>Enrollment</span><span>${course.students} students</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.min(course.students,100)}%; background:${lvl.bar}"></div></div>
+        <span class="level-badge ${lvl.cls}">${lvl.label}</span>
+      </div>
+      <div class="ta-note ${course.students>60?'show':''}">⚠ Requires an additional teaching assistant (enrollment &gt; 60)</div>
+    `;
+  }
+
+  function selectCourseByCode(code){
+    const course = courses.find(c=>c.code===code);
+    if(course){ courseSelect.value = code; renderCourseDetail(course); }
+  }
+
+  courseSelect.addEventListener('change', ()=> selectCourseByCode(courseSelect.value));
+
+  function runCourseSearch(term, targetInput){
+    const q = term.trim().toLowerCase();
+    suggestList.innerHTML = '';
+    if(!q){ suggestList.classList.remove('show'); return; }
+    const matches = courses.filter(c =>
+      c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || c.faculty.toLowerCase().includes(q)
+    );
+    if(matches.length === 0){
+      suggestList.innerHTML = '<div class="suggest-item">No matching course found</div>';
+      suggestList.classList.add('show');
+      return;
+    }
+    matches.forEach(c=>{
+      const item = document.createElement('div');
+      item.className = 'suggest-item';
+      item.innerHTML = `<b>${c.code}</b> — ${c.name} <span style="color:var(--mute)">(${c.faculty})</span>`;
+      item.addEventListener('click', ()=>{
+        selectCourseByCode(c.code);
+        targetInput.value = c.code + ' — ' + c.name;
+        suggestList.classList.remove('show');
+        document.getElementById('explorer').scrollIntoView({behavior:'smooth', block:'start'});
+      });
+      suggestList.appendChild(item);
+    });
+    suggestList.classList.add('show');
+  }
+
+  courseSearch.addEventListener('input', ()=> runCourseSearch(courseSearch.value, courseSearch));
+  globalSearch.addEventListener('input', ()=>{
+    courseSearch.value = globalSearch.value;
+    runCourseSearch(globalSearch.value, globalSearch);
+  });
+  document.addEventListener('click', (e)=>{
+    if(!e.target.closest('.explorer-controls') && !e.target.closest('.search-wrap')) suggestList.classList.remove('show');
+  });
+
+  selectCourseByCode('AI302');
+
+  /* ---------- XPATH EXPLORER ---------- */
+  const queries = {
+    all:          {expr:"/courses/course", mode:'cards', filter:cs=>cs},
+    names:        {expr:"/courses/course/name", mode:'names', filter:cs=>cs},
+    gt50:         {expr:"/courses/course[students &gt; 50]", mode:'cards', filter:cs=>cs.filter(c=>c.students>50)},
+    credits4:     {expr:"/courses/course[credits = 4]", mode:'cards', filter:cs=>cs.filter(c=>c.credits===4)},
+    theory:       {expr:"/courses/course[type = 'Theory']", mode:'cards', filter:cs=>cs.filter(c=>c.type==='Theory')},
+    theoryGt50:   {expr:"/courses/course[type='Theory' and students&gt;50]/name", mode:'names', filter:cs=>cs.filter(c=>c.type==='Theory' && c.students>50)},
+    facultyC4:    {expr:"/courses/course[credits &gt;= 4]/faculty", mode:'faculty', filter:cs=>cs.filter(c=>c.credits>=4)},
+    idC104:       {expr:"/courses/course[@id='C104']", mode:'cards', filter:cs=>cs.filter(c=>c.id==='C104')},
+    first:        {expr:"/courses/course[1]", mode:'cards', filter:cs=>[cs[0]]},
+    last:         {expr:"/courses/course[last()]", mode:'cards', filter:cs=>[cs[cs.length-1]]}
+  };
+  const queryLabels = {
+    all:'All Course Records', names:'Course Names', gt50:'Students &gt; 50', credits4:'Credits = 4',
+    theory:'Theory Courses', theoryGt50:'Theory + Students &gt; 50', facultyC4:'Faculty with Credits ≥ 4',
+    idC104:"Course ID = C104", first:'First Course', last:'Last Course'
+  };
+
+  const xpathSelect = document.getElementById('xpathSelect');
+  Object.keys(queries).forEach(key=>{
+    const opt = document.createElement('option');
+    opt.value = key; opt.innerHTML = queryLabels[key];
+    xpathSelect.appendChild(opt);
+  });
+
+  const xpathExpr = document.getElementById('xpathExpr');
+  const xpathCount = document.getElementById('xpathCount');
+  const xpathResults = document.getElementById('xpathResults');
+  const xpathSearchInput = document.getElementById('xpathSearch');
+  let currentBaseList = [];
+  let currentMode = 'cards';
+
+  function renderResultCard(c){
+    return `<div class="result-card">
+      <div class="rc-code">${c.code}</div>
+      <div class="rc-name">${c.name}</div>
+      <div class="rc-meta"><span>👥 ${c.students}</span><span>🎓 ${c.credits} cr</span><span>${c.type}</span></div>
+    </div>`;
+  }
+
+  function renderXpathResults(list){
+    xpathResults.className = (currentMode==='cards') ? 'xpath-results' : 'xpath-results';
+    if(list.length === 0){
+      xpathResults.innerHTML = '<div class="empty-note">No records match this query.</div>';
+      return;
+    }
+    if(currentMode === 'names'){
+      xpathResults.style.display='flex'; xpathResults.style.flexWrap='wrap';
+      xpathResults.innerHTML = `<div class="chip-grid">${list.map(c=>`<span class="chip">${c.name}</span>`).join('')}</div>`;
+    } else if(currentMode === 'faculty'){
+      xpathResults.style.display='flex'; xpathResults.style.flexWrap='wrap';
+      xpathResults.innerHTML = `<div class="chip-grid">${list.map(c=>`<span class="chip">${c.faculty}</span>`).join('')}</div>`;
+    } else {
+      xpathResults.style.display='grid';
+      xpathResults.innerHTML = list.map(renderResultCard).join('');
+    }
+  }
+
+  function applyQuery(key){
+    const q = queries[key];
+    currentMode = q.mode;
+    currentBaseList = q.filter(courses);
+    xpathExpr.innerHTML = q.expr;
+    xpathCount.textContent = currentBaseList.length + (currentBaseList.length===1?' matching record':' matching records');
+    xpathSearchInput.value = '';
+    renderXpathResults(currentBaseList);
+  }
+
+  xpathSelect.addEventListener('change', ()=> applyQuery(xpathSelect.value));
+  xpathSearchInput.addEventListener('input', ()=>{
+    const q = xpathSearchInput.value.trim().toLowerCase();
+    const filtered = q ? currentBaseList.filter(c =>
+      c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || c.faculty.toLowerCase().includes(q)
+    ) : currentBaseList;
+    xpathCount.textContent = filtered.length + (filtered.length===1?' matching record':' matching records');
+    renderXpathResults(filtered);
+  });
+
+  applyQuery('gt50');
+
+  /* ---------- XSLT REPORT ---------- */
+  const highEnrollment = courses.filter(c=>c.students>40).sort((a,b)=>b.students-a.students);
+  const xsltBody = document.getElementById('xsltTableBody');
+  xsltBody.innerHTML = highEnrollment.map((c,i)=>`
+    <tr>
+      <td><span class="rank-badge">${i+1}</span>${c.code}</td>
+      <td>${c.name}</td>
+      <td>${c.faculty}</td>
+      <td class="students-val">${c.students}</td>
+      <td>${c.credits}</td>
+      <td><span class="type-pill">${c.type}</span></td>
+    </tr>`).join('');
+
+  document.getElementById('reportSummary').innerHTML =
+    `<b>${highEnrollment.length} courses</b> meet the high-enrollment threshold of &gt;40 students · ` +
+    `Highest: <b>${highEnrollment[0].code} — ${highEnrollment[0].students} students</b> · ` +
+    `Lowest among filtered courses: <b>${highEnrollment[highEnrollment.length-1].code} — ${highEnrollment[highEnrollment.length-1].students} students</b>`;
+
+  /* ---------- INSIGHTS ---------- */
+  const highest = courses.reduce((a,b)=> b.students>a.students?b:a);
+  const lowest = courses.reduce((a,b)=> b.students<a.students?b:a);
+  const theoryCourses = courses.filter(c=>c.type==='Theory');
+  const fourCredit = courses.filter(c=>c.credits===4);
+
+  document.getElementById('insightGrid').innerHTML = `
+    <div class="insight-card">
+      <div class="il">🏆 Highest Enrollment</div>
+      <div class="iv">${highest.name}</div>
+      <div class="is">${highest.code} · ${highest.students} students</div>
+    </div>
+    <div class="insight-card">
+      <div class="il">📉 Lowest Enrollment</div>
+      <div class="iv">${lowest.name}</div>
+      <div class="is">${lowest.code} · ${lowest.students} students</div>
+    </div>
+    <div class="insight-card">
+      <div class="il">📖 Theory Courses</div>
+      <div class="iv">${theoryCourses.length} of ${courses.length}</div>
+      <div class="is">${theoryCourses.map(c=>c.code).join(' · ')}</div>
+    </div>
+    <div class="insight-card">
+      <div class="il">🎓 4-Credit Courses</div>
+      <div class="iv">${fourCredit.length} courses</div>
+      <div class="is">${fourCredit.map(c=>c.code).join(' · ')}</div>
+    </div>
+  `;
+
+  /* ---------- SUPPORT ALERT ---------- */
+  const needSupport = courses.filter(c=>c.students>60);
+  document.getElementById('alertRows').innerHTML = needSupport.length
+    ? needSupport.map(c=>`
+      <div class="alert-row">
+        <span class="who">${c.code} · ${c.name} <span>— ${c.faculty}, ${c.students} students</span></span>
+        <span class="ta-tag">TA REQUIRED</span>
+      </div>`).join('')
+    : '<div class="alert-row"><span class="who">No courses currently exceed the 60-student threshold.</span></div>';
+  document.getElementById('alertFooter').textContent =
+    needSupport.length + ' of ' + courses.length + ' courses require additional teaching support';
+
+  /* ---------- SCROLLSPY ---------- */
+  const navLinks = Array.from(document.querySelectorAll('#sideNav a'));
+  const sections = navLinks.map(l => document.querySelector(l.getAttribute('href')));
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const id = '#' + entry.target.id;
+        navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === id));
+      }
+    });
+  }, {rootMargin:'-40% 0px -50% 0px', threshold:0});
+  sections.forEach(s => s && observer.observe(s));
+</script>
+
+</body>
+</html>
