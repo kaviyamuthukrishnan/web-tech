@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIMATS University — Course Registration Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============ NAVIGATION ============ -->
+<header class="site-header" id="top">
+  <div class="nav-wrap">
+    <a class="brand" href="#top">
+      <span class="brand-mark">S</span>
+      <span class="brand-text">SIMATS <em>University</em></span>
+    </a>
+
+    <nav class="primary-nav" id="primaryNav">
+      <a href="#home">Home</a>
+      <a href="#courses">Courses</a>
+      <a href="#registration">Registration</a>
+      <a href="#instructions">Instructions</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <a class="nav-cta" href="#registration">Register now</a>
+
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="home">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <p class="hero-eyebrow">Academic Year 2026&ndash;27 · Semester Registration</p>
+      <h1>Choose your courses.<br>Build your semester.</h1>
+      <p class="hero-lede">
+        The Course Registration Portal for the Department of Information Technology.
+        Browse the semester catalogue, check your eligibility, and lock in your
+        subjects — no queues, no paper forms.
+      </p>
+      <div class="hero-actions">
+        <a href="#courses" class="btn btn-primary">Browse catalogue</a>
+        <a href="#registration" class="btn btn-ghost">Start registration</a>
+      </div>
+
+      <dl class="hero-stats">
+        <div><dt>26</dt><dd>Courses open</dd></div>
+        <div><dt>6</dt><dd>Departments</dd></div>
+        <div><dt>28</dt><dd>Max credits / sem</dd></div>
+      </dl>
+    </div>
+
+    <div class="hero-aside" aria-hidden="false">
+      <span class="blob blob-orange"></span>
+      <span class="blob blob-mint"></span>
+      <span class="blob blob-pink"></span>
+      <div class="ticket" id="termTicket">
+        <div class="ticket-top">
+          <span class="ticket-label">Registration term</span>
+          <span class="ticket-status" id="ticketStatus">Open</span>
+        </div>
+        <div class="ticket-main">
+          <span class="ticket-term">Odd Sem 2026</span>
+          <span class="ticket-dept">B.Tech · Information Technology</span>
+        </div>
+        <div class="ticket-divider">
+          <span class="ticket-notch left"></span>
+          <span class="ticket-notch right"></span>
+        </div>
+        <div class="ticket-bottom">
+          <div><span class="ticket-k">Window closes</span><span class="ticket-v">21 Sept 2026</span></div>
+          <div><span class="ticket-k">Credit cap</span><span class="ticket-v">28 Cr</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COURSES ============ -->
+<section class="section" id="courses">
+  <div class="section-head">
+    <p class="section-eyebrow">Semester catalogue</p>
+    <h2>Available courses</h2>
+    <p class="section-lede">Five departments are offering courses this term. Search by name or code, or filter by type.</p>
+  </div>
+
+  <div class="popular-grid" id="popularGrid">
+    <!-- colorful course cards injected by script.js -->
+  </div>
+
+  <div class="catalogue-controls">
+    <div class="search-field">
+      <input type="text" id="courseSearch" placeholder="Search by course name or code&hellip;" aria-label="Search courses">
+    </div>
+    <div class="filter-field">
+      <label for="typeFilter">Course type</label>
+      <select id="typeFilter">
+        <option value="all">All types</option>
+        <option value="Theory">Theory</option>
+        <option value="Lab">Lab</option>
+        <option value="Elective">Elective</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="course-table" id="courseTable">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Course name</th>
+          <th>Credits</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+      <tbody id="courseTableBody">
+        <!-- rows injected by script.js from the `courses` array -->
+      </tbody>
+    </table>
+    <p class="table-empty" id="tableEmptyState" hidden>No courses match your search.</p>
+  </div>
+</section>
+
+<!-- ============ REGISTRATION ============ -->
+<section class="section section-alt" id="registration">
+  <div class="section-head">
+    <p class="section-eyebrow">Enrol for the term</p>
+    <h2>Register your courses</h2>
+    <p class="section-lede">Fill in your details on the left, choose your courses on the right. Your summary updates as you go.</p>
+  </div>
+
+  <ol class="progress-track" id="progressTrack">
+    <li class="is-active" data-step="1"><span class="progress-index">1</span>Student details</li>
+    <li data-step="2"><span class="progress-index">2</span>Course selection</li>
+    <li data-step="3"><span class="progress-index">3</span>Confirmation</li>
+  </ol>
+
+  <form class="registration-grid" id="registrationForm" novalidate>
+
+    <fieldset class="reg-panel">
+      <legend>Student information</legend>
+
+      <div class="field">
+        <label for="regNumber">Register number</label>
+        <input type="text" id="regNumber" name="regNumber" placeholder="ITA24XXXX" autocomplete="off">
+        <span class="field-error" id="err-regNumber"></span>
+      </div>
+
+      <div class="field">
+        <label for="studentName">Student name</label>
+        <input type="text" id="studentName" name="studentName" placeholder="Enter your full name" autocomplete="name">
+        <span class="field-error" id="err-studentName"></span>
+      </div>
+
+      <div class="field">
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" placeholder="you@simats.edu.in" autocomplete="email">
+        <span class="field-error" id="err-email"></span>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="department">Department</label>
+          <select id="department" name="department">
+            <option value="">Select department</option>
+            <option value="IT">Information Technology</option>
+            <option value="CSE">Computer Science &amp; Engineering</option>
+            <option value="ECE">Electronics &amp; Communication</option>
+            <option value="EEE">Electrical &amp; Electronics</option>
+            <option value="MECH">Mechanical Engineering</option>
+          </select>
+          <span class="field-error" id="err-department"></span>
+        </div>
+
+        <div class="field">
+          <label for="semester">Semester</label>
+          <select id="semester" name="semester">
+            <option value="">Select semester</option>
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+            <option value="3">Semester 3</option>
+            <option value="4">Semester 4</option>
+            <option value="5">Semester 5</option>
+            <option value="6">Semester 6</option>
+            <option value="7">Semester 7</option>
+            <option value="8">Semester 8</option>
+          </select>
+          <span class="field-error" id="err-semester"></span>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="reg-panel">
+      <legend>Course selection</legend>
+      <p class="reg-panel-hint">Choose the courses you want for this semester.</p>
+
+      <div class="course-picker" id="coursePicker">
+        <!-- checkboxes injected by script.js -->
+      </div>
+      <span class="field-error" id="err-courses"></span>
+    </fieldset>
+
+    <aside class="reg-summary" id="regSummary">
+      <span class="reg-summary-label">Live summary</span>
+
+      <div class="ring-wrap">
+        <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="ring-track" cx="60" cy="60" r="50"></circle>
+          <circle class="ring-progress" id="ringProgress" cx="60" cy="60" r="50"></circle>
+        </svg>
+        <div class="ring-center">
+          <span class="ring-value" id="totalCredits">0</span>
+          <span class="ring-unit">of 28 Cr</span>
+        </div>
+      </div>
+
+      <p class="reg-summary-count"><strong id="selectedCount">0</strong> course<span id="selectedCountPlural">s</span> selected</p>
+
+      <div class="chip-list" id="chipList"></div>
+
+      <p class="reg-summary-note" id="creditNote">Select at least one course to continue.</p>
+      <button type="submit" class="btn btn-primary btn-block">Complete registration</button>
+    </aside>
+  </form>
+
+  <!-- Dynamically generated confirmation ticket, hidden until a valid submission -->
+  <div class="confirmation" id="confirmationCard" hidden>
+    <div class="confirmation-card">
+      <div class="confirmation-check" aria-hidden="true">
+        <svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 16-16"/></svg>
+      </div>
+      <h3>Registration complete</h3>
+      <p class="confirmation-sub">A copy of this summary has been recorded for your term file.</p>
+
+      <div class="confirmation-body">
+        <div class="confirmation-row"><span>Student name</span><strong id="cName"></strong></div>
+        <div class="confirmation-row"><span>Register number</span><strong id="cReg"></strong></div>
+        <div class="confirmation-row"><span>Department</span><strong id="cDept"></strong></div>
+        <div class="confirmation-row"><span>Semester</span><strong id="cSem"></strong></div>
+
+        <div class="confirmation-divider"></div>
+
+        <ul class="confirmation-courses" id="cCourseList"></ul>
+
+        <div class="confirmation-divider"></div>
+
+        <div class="confirmation-row confirmation-total"><span>Total credits</span><strong id="cTotal"></strong></div>
+      </div>
+
+      <button type="button" class="btn btn-ghost btn-block" id="editRegistrationBtn">Edit registration</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INSTRUCTIONS ============ -->
+<section class="section" id="instructions">
+  <div class="section-head">
+    <p class="section-eyebrow">Before you submit</p>
+    <h2>Registration guidelines &amp; eligibility</h2>
+  </div>
+
+  <div class="instructions-grid">
+    <div class="instructions-card">
+      <h3>Registration guidelines</h3>
+      <ul class="check-list">
+        <li>Enter your register number exactly as printed on your ID card.</li>
+        <li>Use your official university email address, not a personal one.</li>
+        <li>Only select courses offered for your current semester.</li>
+        <li>Check your total credits against your department's ceiling.</li>
+        <li>Submit before the registration window closes on 21 Sept 2026.</li>
+      </ul>
+    </div>
+
+    <div class="instructions-card">
+      <h3>Eligibility requirements</h3>
+      <ol class="number-list">
+        <li>You must be currently enrolled and in good academic standing.</li>
+        <li>Prerequisite courses for your programme must be completed.</li>
+        <li>Course combinations must comply with your department's rules.</li>
+        <li>You may not exceed the permitted credit limit for the term.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="resources">
+    <h3>Useful resources</h3>
+    <ul class="resource-list">
+      <li>
+        <span class="resource-icon swatch-indigo">&#128197;</span>
+        <span class="resource-text">
+          <a href="#courses">Academic calendar</a>
+          <span>Key term dates, from orientation to results day</span>
+        </span>
+      </li>
+      <li>
+        <span class="resource-icon swatch-orange">&#127979;</span>
+        <span class="resource-text">
+          <a href="https://www.ugc.gov.in/" target="_blank" rel="noopener">University Grants Commission &#8599;</a>
+          <span>National regulations governing course credit and curricula</span>
+        </span>
+      </li>
+      <li>
+        <span class="resource-icon swatch-mint">&#9993;</span>
+        <span class="resource-text">
+          <a href="mailto:academic@simats.edu.in">Email the Academic Office</a>
+          <span>For registration holds, transcript queries, or exceptions</span>
+        </span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section class="section section-alt" id="contact">
+  <div class="section-head">
+    <p class="section-eyebrow">Get in touch</p>
+    <h2>Contact the Academic Office</h2>
+    <p class="section-lede">Questions about eligibility, credit limits, or a course clash? Reach the registrar's desk directly.</p>
+  </div>
+
+  <div class="contact-grid">
+    <div class="contact-card">
+      <span class="contact-icon swatch-indigo">&#128205;</span>
+      <span class="contact-kicker">Campus</span>
+      <p>SIMATS University<br>Thandalam, Chennai 602105<br>Tamil Nadu, India</p>
+    </div>
+    <div class="contact-card">
+      <span class="contact-icon swatch-orange">&#9993;</span>
+      <span class="contact-kicker">Email</span>
+      <p><a href="mailto:academic@simats.edu.in">academic@simats.edu.in</a></p>
+    </div>
+    <div class="contact-card">
+      <span class="contact-icon swatch-mint">&#9742;</span>
+      <span class="contact-kicker">Phone</span>
+      <p><a href="tel:+914427173456">+91 44 2717 3456</a><br>Mon&ndash;Sat, 9:00&ndash;17:00</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <span class="brand-mark small">S</span>
+      <span>SIMATS University &mdash; Course Registration Portal</span>
+    </div>
+    <nav class="footer-nav">
+      <a href="#home">Home</a>
+      <a href="#courses">Courses</a>
+      <a href="#registration">Registration</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <p class="footer-note">Built for the Web Technology unit assessment &middot; Unit I &amp; Unit II</p>
+  </div>
+</footer>
+
+<!-- Toast notification region -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/script.js"></script>
+</body>
+</html>
